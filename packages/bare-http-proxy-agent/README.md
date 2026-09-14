@@ -105,12 +105,19 @@ Bare:
 | handshake timeout | `opts.timeout`                                      | n/a — there is no handshake to time out                                  |
 
 The rewrite point is the only one with teeth. Node assigns `req.path` and calls
-`req.setHeader` from `addRequest`; under bare-http1 `addRequest` is called from the
-`ClientRequest` constructor _before_ it assigns `_path` and `_headers`, so anything written
-there is overwritten a line later. The agent instead shadows the request's `_header()` — the
-one place the request line is actually made, called once when the headers are flushed — and
-applies the same edit with the same values there. Callers see no difference; anyone reading
-`req.path` between construction and the first write would.
+`req.setHeader` from `addRequest`. The same edit in the same place works under bare-http1
+4.6, which assigns `_path` and `_headers` before it calls `addRequest` — but it did not
+always, and an agent that writes to them there is one line of constructor order away from
+being silently overwritten. So the rewrite is deferred instead to the one place the request
+line is actually made: `_header()`, called once when the headers are flushed, shadowed on
+the request. Same edit, same values, applied later than Node applies it.
+
+Deferring it also settles when `proxyHeaders` is read. In function form it is called at
+flush rather than at construction, so a header that changes between the two — a rotating
+credential, say — goes out as it stands when the request leaves.
+
+Callers see no difference; anyone reading `req.path` between construction and the first
+write would.
 
 Nothing in the Node stack can be reused as it stands: Bare has no `net`, `tls` or `http`
 builtins, and `agent-base` is written against Node's `http.Agent` internals.

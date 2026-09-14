@@ -164,7 +164,9 @@ before it calls `agent.addRequest`, and an edit made there does reach the wire (
 assumed). But the names are `_path` and `_headers`, and `_header()` is where the request line
 is actually built. [`bare-http-proxy-agent`](packages/bare-http-proxy-agent) shadows
 `_header()` rather than writing to `_path` in `addRequest`, so that it holds regardless of
-where in construction `addRequest` is called from.
+where in construction `addRequest` is called from — bare-http1 called it before those
+assignments until 4.6 — and so that `proxyHeaders` in its function form is read at flush
+rather than at construction.
 
 The general point stands for anything below the public API: `_header()`, `_frame()`,
 `_fields()`, `_headers`, `_isTunnel()` are `bare-http1`'s privates, and they are not Node's

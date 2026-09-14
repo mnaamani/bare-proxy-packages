@@ -79,12 +79,14 @@ export class HttpProxyAgent extends ProxyHTTPAgent {
   // the request at all.
   //
   // http-proxy-agent does the rewrite here too, by assigning `req.path` and calling
-  // `req.setHeader`. That cannot work as it stands under bare-http1: this is called from
-  // the ClientRequest constructor *before* it assigns `_path` and `_headers`, so anything
-  // written to them here is overwritten a line later. So the rewrite is deferred to the one
-  // point where the request line is actually made — `_header()`, called once when the
-  // headers are flushed — by shadowing that method on this request. Same edit, same values,
-  // applied later than Node applies it.
+  // `req.setHeader`. Writing to `_path` and `_headers` from here does reach the wire under
+  // bare-http1 4.6, whose ClientRequest assigns both before it calls addRequest — but it
+  // called addRequest first until then, and an edit that depends on which side of that call
+  // it lands on is one constructor reordering away from being silently dropped. So the
+  // rewrite is deferred to the one point where the request line is actually made —
+  // `_header()`, called once when the headers are flushed — by shadowing that method on
+  // this request. Same edit, same values, applied later than Node applies it, and with
+  // `proxyHeaders` in its function form read at flush rather than at construction.
   addRequest(req, opts) {
     super.addRequest(req, opts)
 
