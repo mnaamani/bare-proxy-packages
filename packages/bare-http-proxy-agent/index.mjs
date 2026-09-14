@@ -76,40 +76,26 @@ export class HttpProxyAgent extends ProxyHTTPAgent {
   }
 
   // Where the request-line rewrite goes in, since it is the only place an agent is handed
-  // the request at all.
+  // the request at all. http-proxy-agent's rewrite, in http-proxy-agent's place: bare-http1
+  // assigns `_path` and `_headers` before it calls this, so an edit made here is the one
+  // that goes out. That ordering is what the `^4.6.0` dependency is for — addRequest was
+  // called ahead of those assignments until then, and the edit would have been overwritten
+  // a line later.
   //
-  // http-proxy-agent does the rewrite here too, by assigning `req.path` and calling
-  // `req.setHeader`. Writing to `_path` and `_headers` from here does reach the wire under
-  // bare-http1 4.6, whose ClientRequest assigns both before it calls addRequest — but it
-  // called addRequest first until then, and an edit that depends on which side of that call
-  // it lands on is one constructor reordering away from being silently dropped. So the
-  // rewrite is deferred to the one point where the request line is actually made —
-  // `_header()`, called once when the headers are flushed — by shadowing that method on
-  // this request. Same edit, same values, applied later than Node applies it, and with
-  // `proxyHeaders` in its function form read at flush rather than at construction.
+  // Unconditional, where http-proxy-agent tests the path for `://` first to see whether it
+  // is already absolute. That test answers yes for any path that merely contains a url —
+  // `/callback?to=https://example.com`, which is what half of lnurl looks like — and the
+  // request then goes to the proxy in origin-form with no Proxy-Authorization on it, for
+  // the proxy to read as a request for itself. There is nothing here to test for: this
+  // runs once per request, on a request that has not been written to yet.
   addRequest(req, opts) {
     super.addRequest(req, opts)
 
-    const agent = this
-    const inherited = req._header
-    let rewritten = false
+    req._path = absolute(req, opts)
 
-    req._header = function () {
-      // A flag rather than http-proxy-agent's test for `://` in the path. That test asks
-      // whether the path is already absolute, and answers yes for any path that merely
-      // contains a url — `/callback?to=https://example.com`, which is what half of lnurl
-      // looks like. The request then goes to the proxy in origin-form, with no
-      // Proxy-Authorization on it, and the proxy reads it as a request for itself.
-      if (!rewritten) {
-        rewritten = true
-        this._path = absolute(this, opts)
-
-        for (const [name, value] of Object.entries(agent._headersFor())) {
-          if (value === undefined || value === null || value === '') continue
-          set(this, name, value)
-        }
-      }
-      return inherited.call(this)
+    for (const [name, value] of Object.entries(this._headersFor())) {
+      if (value === undefined || value === null || value === '') continue
+      set(req, name, value)
     }
   }
 

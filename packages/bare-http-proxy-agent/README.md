@@ -100,24 +100,15 @@ Bare:
 | ----------------- | --------------------------------------------------- | ------------------------------------------------------------------------ |
 | base class        | `agent-base`'s `Agent`, over `http.Agent`           | `bare-http1`'s `Agent`                                                   |
 | socket hook       | `connect(req, opts)` returning a socket or an agent | `createConnection(opts)` returning a socket                              |
-| rewrite point     | `addRequest`, assigning `req.path`                  | `addRequest`, deferred to the request's `_header()`                      |
+| rewrite point     | `addRequest`, assigning `req.path`                  | `addRequest`, assigning `req._path`                                      |
 | `agent.proxy`     | a `URL`                                             | the parsed `{ protocol, host, port, … }`; `agent.proxyUrl` is the string |
 | handshake timeout | `opts.timeout`                                      | n/a — there is no handshake to time out                                  |
 
-The rewrite point is the only one with teeth. Node assigns `req.path` and calls
-`req.setHeader` from `addRequest`. The same edit in the same place works under bare-http1
-4.6, which assigns `_path` and `_headers` before it calls `addRequest` — but it did not
-always, and an agent that writes to them there is one line of constructor order away from
-being silently overwritten. So the rewrite is deferred instead to the one place the request
-line is actually made: `_header()`, called once when the headers are flushed, shadowed on
-the request. Same edit, same values, applied later than Node applies it.
-
-Deferring it also settles when `proxyHeaders` is read. In function form it is called at
-flush rather than at construction, so a header that changes between the two — a rotating
-credential, say — goes out as it stands when the request leaves.
-
-Callers see no difference; anyone reading `req.path` between construction and the first
-write would.
+Both rewrite the request line from `addRequest`, which is the only place an agent is handed
+the request at all. The names are the difference: `req._path` and `req._headers` here,
+`req.path` and `req.setHeader` there. bare-http1 assigns both before it calls `addRequest`,
+so the edit goes out as made — which is what the `bare-http1` `^4.6.0` requirement is for,
+since it called `addRequest` ahead of those assignments until 4.6.
 
 Nothing in the Node stack can be reused as it stands: Bare has no `net`, `tls` or `http`
 builtins, and `agent-base` is written against Node's `http.Agent` internals.

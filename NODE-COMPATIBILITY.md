@@ -159,14 +159,13 @@ A proxy agent for `http:` targets has to rewrite the request line into absolute 
 (`GET http://origin.example/v1/info HTTP/1.1`). Neither client offers a public way to do it.
 Node's `http-proxy-agent` assigns `req.path` and calls `req.setHeader()` from `addRequest`.
 
-Under `bare-http1` 4.6.2 that works too — `ClientRequest` assigns `_path` and `_headers`
+That works under `bare-http1` 4.6 too — `ClientRequest` assigns `_path` and `_headers`
 before it calls `agent.addRequest`, and an edit made there does reach the wire (checked, not
-assumed). But the names are `_path` and `_headers`, and `_header()` is where the request line
-is actually built. [`bare-http-proxy-agent`](packages/bare-http-proxy-agent) shadows
-`_header()` rather than writing to `_path` in `addRequest`, so that it holds regardless of
-where in construction `addRequest` is called from — bare-http1 called it before those
-assignments until 4.6 — and so that `proxyHeaders` in its function form is read at flush
-rather than at construction.
+assumed), which is why [`bare-http-proxy-agent`](packages/bare-http-proxy-agent) requires
+`^4.6.0` and does the rewrite in the same place Node does. What differs is only the
+spelling: `req._path` rather than `req.path`, and `req._headers` alongside `setHeader`,
+because `_header()` lowercases every name on its way out and two casings of one name would
+otherwise go out as two headers.
 
 The general point stands for anything below the public API: `_header()`, `_frame()`,
 `_fields()`, `_headers`, `_isTunnel()` are `bare-http1`'s privates, and they are not Node's
