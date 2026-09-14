@@ -1,14 +1,19 @@
 {
   "name": "bare-any-proxy-agent",
   "version": "0.1.0",
-  "description": "One entry point for every proxy scheme Bare speaks — socks5, socks5h, http, https — picking the agent a proxy url calls for",
+  "description": "One entry point for every proxy scheme Bare speaks \u2014 socks5, socks5h, http, https \u2014 picking the agent a proxy url calls for",
   "main": "index.mjs",
+  "types": "./index.d.ts",
   "exports": {
-    ".": "./index.mjs",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
     "./package": "./package.json"
   },
   "files": [
     "index.mjs",
+    "index.d.ts",
     "lib",
     "LICENSE",
     "NOTICE",
@@ -24,7 +29,16 @@
     "bare-socks-proxy-agent": "^0.1.0"
   },
   "devDependencies": {
+    "bare-url": "^2.5.4",
     "brittle": "^3.19.0"
+  },
+  "peerDependencies": {
+    "bare-url": "*"
+  },
+  "peerDependenciesMeta": {
+    "bare-url": {
+      "optional": true
+    }
   },
   "repository": {
     "type": "git",

@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "description": "Tunnel http and websocket traffic through a proxy under Bare: the socket, agents and handshake plumbing every proxy protocol shares",
   "main": "index.mjs",
+  "types": "./index.d.ts",
   "exports": {
-    ".": "./index.mjs",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
     "./package": "./package.json"
   },
   "files": [
     "index.mjs",
+    "index.d.ts",
     "lib",
     "LICENSE",
     "NOTICE",
@@ -24,10 +29,24 @@
     "bare-tls": "^3.1.7"
   },
   "devDependencies": {
+    "bare-buffer": "^3.7.1",
     "bare-fetch": "^3.2.0",
     "bare-http1": "^4.6.0",
     "bare-tcp": "^2.5.0",
+    "bare-url": "^2.5.4",
     "brittle": "^3.19.0"
+  },
+  "peerDependencies": {
+    "bare-buffer": "*",
+    "bare-url": "*"
+  },
+  "peerDependenciesMeta": {
+    "bare-buffer": {
+      "optional": true
+    },
+    "bare-url": {
+      "optional": true
+    }
   },
   "repository": {
     "type": "git",

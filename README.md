@@ -33,6 +33,24 @@ const response = await fetch(target, { agent: agents?.https })
 
 Each package's README has its own reference.
 
+## Types
+
+Every package ships a handwritten `index.d.ts`, documented with TSDoc, so an editor has
+both the signature and the reasoning at the call site. Nothing needs installing — the
+declarations come with the package, under its `types` export condition.
+
+`bare-url` and `bare-buffer` are optional peer dependencies: a `URL` and a `Buffer` appear
+in the signatures, and a project that typechecks against Bare will have both, but neither
+is loaded at run time. This is how `bare-http1` declares the same pair.
+
+Declaration files are handwritten, so nothing makes them agree with the code on their own —
+`npm run types` is what does, and it runs in CI:
+
+```sh
+npm run types   # tsc --noEmit over every .d.ts and the type tests,
+                # then checks that what each .d.ts declares is what the package exports
+```
+
 ## Development
 
 ```sh
@@ -40,7 +58,7 @@ npm install
 npm i -g bare-runtime   # the tests run under Bare
 npm test                # every workspace
 npm test --workspace bare-socks-proxy-agent
-npm run lint
+npm run lint            # prettier, lunte, and the type checks above
 ```
 
 ## License

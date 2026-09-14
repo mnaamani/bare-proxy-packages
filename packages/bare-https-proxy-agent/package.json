@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "description": "HTTP CONNECT proxy agents for Bare, for bare-fetch and bare-ws",
   "main": "index.mjs",
+  "types": "./index.d.ts",
   "exports": {
-    ".": "./index.mjs",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
     "./package": "./package.json"
   },
   "files": [
     "index.mjs",
+    "index.d.ts",
     "lib",
     "LICENSE",
     "NOTICE",
@@ -24,7 +29,16 @@
     "bare-fetch": "^3.2.0",
     "bare-http1": "^4.6.0",
     "bare-tcp": "^2.5.0",
+    "bare-url": "^2.5.4",
     "brittle": "^3.19.0"
+  },
+  "peerDependencies": {
+    "bare-url": "*"
+  },
+  "peerDependenciesMeta": {
+    "bare-url": {
+      "optional": true
+    }
   },
   "repository": {
     "type": "git",

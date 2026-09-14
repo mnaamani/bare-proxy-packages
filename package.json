@@ -1,22 +1,26 @@
 {
   "name": "bare-proxy-packages",
   "version": "0.0.0",
-  "description": "Proxy agents for Bare — socks5, http forward and http CONNECT, and the plumbing they share",
+  "description": "Proxy agents for Bare \u2014 socks5, http forward and http CONNECT, and the plumbing they share",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
     "test": "npm test --workspaces",
-    "lint": "prettier . --check && lunte",
+    "types": "tsc --noEmit && node scripts/check-typings.mjs",
+    "lint": "prettier . --check && lunte && npm run types",
     "format": "prettier . --write"
   },
   "devDependencies": {
+    "bare-buffer": "^3.7.1",
     "bare-runtime": "^1.29.5",
+    "bare-url": "^2.5.4",
     "brittle": "^3.19.0",
     "lunte": "^1.2.0",
     "prettier": "^3.6.2",
-    "prettier-config-holepunch": "^2.0.0"
+    "prettier-config-holepunch": "^2.0.0",
+    "typescript": "^5.9.3"
   },
   "repository": {
     "type": "git",
