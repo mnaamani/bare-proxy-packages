@@ -14,6 +14,10 @@ An npm workspace — each directory under `packages/` is published on its own.
 | [`bare-proxy-agent`](packages/bare-proxy-agent)             | The socket, agents and handshake plumbing the three above share                      | [`agent-base`](https://www.npmjs.com/package/agent-base)               |
 | [`bare-proxy-from-env`](packages/bare-proxy-from-env)       | Reads `http_proxy`, `https_proxy`, `ALL_PROXY` and `no_proxy`                        | [`proxy-from-env`](https://www.npmjs.com/package/proxy-from-env)       |
 
+None of them is a drop-in port of its Node counterpart. [NODE-COMPATIBILITY.md](NODE-COMPATIBILITY.md)
+is the account of why: how `bare-http1` differs from Node's `http`, and which of those
+differences reach the surface of these packages.
+
 Most programs want `bare-any-proxy-agent` with `bare-proxy-from-env`:
 
 ```js
