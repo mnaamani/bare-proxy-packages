@@ -11,7 +11,7 @@
 // A real `https:` target works the same way, with `agents.https` negotiating TLS inside the
 // tunnel the proxy opened — at which point the proxy is carrying ciphertext.
 import 'bare-fetch/global'
-import { createAgents, proxyErrorIn } from 'bare-https-proxy-agent'
+import { createAgents, HttpsProxyHTTPAgent, proxyErrorIn } from 'bare-https-proxy-agent'
 import { connectProxy, hosts, origin } from './lib/toy-servers.mjs'
 
 const target = await origin()
@@ -87,11 +87,10 @@ console.log()
 
 const tunnelsSoFar = proxy.asked.length
 
-// The tunnel this agent opens carries the request as it stands, with no TLS on top. A
-// target on port 443 therefore means an `https:` url has reached the agent built for
-// `http:` — which a redirect will do, since `bare-fetch` follows redirects itself and keeps
-// the agent it was handed for every hop. Refused rather than sent in the clear.
-const downgrade = await fetch('https://origin.example/vault', { agent: agents.http }).then(
+// A standalone plaintext agent rejects an HTTPS target on every port. The linked pair
+// above would delegate to its HTTPS member instead, including across redirects.
+const plaintext = new HttpsProxyHTTPAgent(`http://127.0.0.1:${proxy.port}`)
+const downgrade = await fetch('https://origin.example:8443/vault', { agent: plaintext }).then(
   () => null,
   (err) => proxyErrorIn(err)
 )
@@ -99,6 +98,7 @@ console.log('the guard on the base agent:', downgrade.message)
 console.log('and no tunnel was asked for:', proxy.asked.length === tunnelsSoFar)
 
 agents.http.destroy()
+plaintext.destroy()
 agents.https.destroy()
 anonymous.http.destroy()
 anonymous.https.destroy()

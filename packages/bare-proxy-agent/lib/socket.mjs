@@ -29,6 +29,7 @@ export class ProxySocket extends Duplex {
     this._handshake = handshake
     this._handshakeTimeout = timeout
     this._target = { host: opts.host, port: opts.port }
+    if (opts.protocol) this._target.protocol = opts.protocol
     this._socket = null
     this._timer = null
 

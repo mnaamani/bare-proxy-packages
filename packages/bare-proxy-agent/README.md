@@ -86,31 +86,26 @@ out, which is what the person whose proxy is not running needs to read.
 
 ## Compared to Node's proxy agents
 
-Node's proxy agents share [`agent-base`](https://www.npmjs.com/package/agent-base), which
-subclasses `http.Agent` and asks a subclass for `connect(req, opts)`. This package is the
-same idea against `bare-http1`, whose agent asks for `createConnection(opts)` instead — and
-which, unlike `agent-base`, tells an agent nothing about whether the target is `https:`.
-That is the one difference callers feel: an agent per target protocol rather than one for
-both, which is why `createAgents()` returns a pair.
+Node's proxy agents share `agent-base`, whose `connect(req, opts)` receives
+`secureEndpoint`. This package uses `bare-http1`'s `addRequest(req, opts)` and
+`createConnection(opts)`, with `opts.protocol` identifying the request scheme.
 
-`agent-base` itself cannot be reused: Bare has no `net`, `tls` or `http` builtins, and it is
-written against Node's `http.Agent` internals.
+## Redirects and standalone agents
 
-## What the base refuses
+`createAgents()` returns linked HTTP and HTTPS agents. Either member delegates a request
+with the other scheme before consulting its connection pool. This supports `bare-fetch`
+redirects on every port while keeping TLS connections separate from plaintext ones.
+`pairAgents(http, https)` links separately constructed agents in the same way. Destroy both
+members when finished.
 
-`ProxyHTTPAgent` writes the request to whatever the handshake opened, with nothing negotiated
-on top, so a target on port 443 means an `https:` url has reached the agent built for `http:`
-— and carrying it would send in the clear what was asked for in confidence. The handshake is
-refused with a `ProxyError` before anything is written. `ProxyHTTPSAgent`, which runs TLS, is
-exempt.
+A standalone agent rejects an incompatible explicit scheme with `ProxyError`. A direct
+connection without `protocol` uses the selected agent, with a conservative port-443 refusal
+on the plaintext agent. Subclasses overriding `tunnel` must build on `super.tunnel` to keep
+that socket-level guard.
 
-The way an https: target reaches the wrong agent is a redirect: `bare-fetch` follows them
-itself and keeps, for every hop, the agent it was handed, while an agent under bare-http1
-_is_ the scheme. The guard covers the default port; a caller that follows redirects should
-re-pick the agent per hop, or refuse a response whose final url changed scheme.
-
-An agent that overrides `get tunnel()` must build on `super.tunnel` rather than on
-`_tunnel`, or it drops the guard along with it.
+Use `bare-http1` 4.6.2 and `bare-https` 3.1.0 or newer. Older clients that omit the scheme
+require manual redirect handling and agent selection before each request. The pair retains
+its configured proxy across redirects; it does not reevaluate environment bypass rules.
 
 ## Licence
 

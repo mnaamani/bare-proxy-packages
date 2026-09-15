@@ -124,9 +124,13 @@ test('a request goes out over whatever the handshake opened', async (t) => {
 // since it keeps the agent it was handed and an agent under bare-http1 *is* the scheme.
 test('the http agent refuses to carry a plain request to port 443', async (t) => {
   const proxy = await demoProxy(t)
-  const agents = agentsFor(t, proxy.port)
+  const agent = new ProxyHTTPAgent({
+    proxy: parseProxyUrl(`demo://127.0.0.1:${proxy.port}`, SCHEMES),
+    handshake
+  })
+  t.teardown(() => agent.destroy())
 
-  const err = await fetch('https://secret.example/vault', { agent: agents.http }).then(
+  const err = await fetch('https://secret.example/vault', { agent }).then(
     () => null,
     (err) => proxyErrorIn(err) ?? err
   )

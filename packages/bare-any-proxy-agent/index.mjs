@@ -8,7 +8,7 @@
 // The protocols live in bare-socks-proxy-agent, bare-http-proxy-agent and
 // bare-https-proxy-agent, and the shared half in bare-proxy-agent. Nothing is implemented
 // here; this is the table.
-import { ProxyError, parseProxyUrl, proxyErrorIn, proxyName } from 'bare-proxy-agent'
+import { ProxyError, pairAgents, parseProxyUrl, proxyErrorIn, proxyName } from 'bare-proxy-agent'
 import * as socks from 'bare-socks-proxy-agent'
 import * as forward from 'bare-http-proxy-agent'
 import * as connect from 'bare-https-proxy-agent'
@@ -26,10 +26,10 @@ import * as connect from 'bare-https-proxy-agent'
 const overHttp = {
   parse: connect.parse,
   createAgents(proxy, opts) {
-    return {
-      http: new forward.HttpProxyAgent(proxy, opts),
-      https: new connect.HttpsProxyHTTPSAgent(proxy, opts)
-    }
+    return pairAgents(
+      new forward.HttpProxyAgent(proxy, opts),
+      new connect.HttpsProxyHTTPSAgent(proxy, opts)
+    )
   }
 }
 

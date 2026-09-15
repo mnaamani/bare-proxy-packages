@@ -1,10 +1,14 @@
 // The table: that every scheme lands on the package that speaks it, and that one nothing
 // speaks is refused rather than passed over.
 import test from 'brittle'
+import 'bare-fetch/global'
+import tcp from 'bare-tcp'
+import https from 'bare-https'
+import { cert, key } from '../../../test/fixtures/tls.mjs'
 import { HttpProxyAgent } from 'bare-http-proxy-agent'
 import { HttpsProxyHTTPAgent, HttpsProxyHTTPSAgent } from 'bare-https-proxy-agent'
 import { SocksProxyHTTPAgent, SocksProxyHTTPSAgent } from 'bare-socks-proxy-agent'
-import { createAgents, parse, protocols, proxyName } from '../index.mjs'
+import { createAgents, parse, protocols, proxyErrorIn, proxyName } from '../index.mjs'
 
 test('every scheme there is an agent for', (t) => {
   t.alike(protocols, ['socks5', 'socks5h', 'http', 'https'])
@@ -85,10 +89,126 @@ test('options reach the agent the scheme called for', (t) => {
   t.alike(agents.http.proxyHeaders, { 'X-Probe': '1' })
 })
 
+test(
+  'standalone plaintext agents reject HTTPS on a nonstandard port before opening sockets',
+  { timeout: 3000 },
+  async (t) => {
+    for (const agent of [
+      new HttpProxyAgent('http://127.0.0.1:1'),
+      new HttpsProxyHTTPAgent('http://127.0.0.1:1'),
+      new SocksProxyHTTPAgent('socks5://127.0.0.1:1')
+    ]) {
+      t.teardown(() => agent.destroy())
+      const error = await fetch('https://secret.example:8443/vault', { agent }).then(
+        () => null,
+        (err) => proxyErrorIn(err)
+      )
+      t.is(error?.code, 'PROXY_ERROR')
+      t.ok(error?.message.includes('https: target on port 8443'))
+      t.is([...agent.sockets].length, 0, 'no connection was opened')
+    }
+  }
+)
+
 function destroyed(t, agents) {
   t.teardown(() => {
     agents.http.destroy()
     agents.https.destroy()
   })
   return agents
+}
+
+test(
+  'redirects switch between forwarding and TLS on the same nonstandard port',
+  { timeout: 5000 },
+  async (t) => {
+    const received = []
+    const origin = https.createServer({ cert, key }, (req, res) => {
+      received.push({ path: req.url, authorization: req.headers['proxy-authorization'] })
+      if (req.url === '/back') {
+        res.writeHead(302, { location: `http://localhost:${origin.address().port}/final` })
+        res.end()
+      } else res.end('encrypted response')
+    })
+    await listen(t, origin)
+    const targetPort = origin.address().port
+    const lines = []
+    const proxy = tcp.createServer((socket) => {
+      let head = ''
+      const ondata = (chunk) => {
+        head += chunk.toString()
+        const end = head.indexOf('\r\n\r\n')
+        if (end === -1) return
+        const line = head.slice(0, head.indexOf('\r\n'))
+        lines.push(line)
+        if (line.startsWith('CONNECT ')) {
+          socket.off('data', ondata)
+          const upstream = tcp.createConnection({ host: '127.0.0.1', port: targetPort })
+          upstream.on('error', () => socket.destroy())
+          socket.on('close', () => upstream.destroy())
+          const rest = Buffer.from(head.slice(end + 4))
+          if (rest.length) upstream.write(rest)
+          socket.write('HTTP/1.1 200 Connection Established\r\n\r\n')
+          socket.pipe(upstream).pipe(socket)
+        } else {
+          const target = new URL(line.split(' ')[1])
+          if (target.pathname === '/final') {
+            socket.write('HTTP/1.1 200 OK\r\nContent-Length: 4\r\n\r\ndone')
+          } else {
+            socket.write(
+              `HTTP/1.1 302 Found\r\nLocation: https://localhost:${targetPort}/secure\r\nContent-Length: 0\r\n\r\n`
+            )
+          }
+          head = ''
+        }
+      }
+      socket.on('error', () => {})
+      socket.on('data', ondata)
+    })
+    await listen(t, proxy)
+    const agents = destroyed(
+      t,
+      createAgents(`http://user:password@127.0.0.1:${proxy.address().port}`, { ca: cert })
+    )
+
+    const response = await fetch(`http://localhost:${targetPort}/start`, { agent: agents.http })
+    t.is(await response.text(), 'encrypted response')
+    // Start on the TLS member too; the redirect must reach the forwarding member.
+    const back = await fetch(`https://localhost:${targetPort}/back`, { agent: agents.https })
+    t.is(await back.text(), 'done')
+    t.alike(
+      lines,
+      [
+        `GET http://localhost:${targetPort}/start HTTP/1.1`,
+        `CONNECT localhost:${targetPort} HTTP/1.1`,
+        `GET http://localhost:${targetPort}/final HTTP/1.1`
+      ],
+      'the redirect did not reuse a plaintext socket for TLS or forward a TLS request'
+    )
+    t.alike(
+      received,
+      [
+        { path: '/secure', authorization: undefined },
+        { path: '/back', authorization: undefined }
+      ],
+      'origin requests keep origin-form and carry no proxy credentials'
+    )
+  }
+)
+
+function listen(t, server) {
+  const sockets = new Set()
+  server.on('connection', (socket) => {
+    sockets.add(socket)
+    socket.on('error', () => {})
+    socket.once('close', () => sockets.delete(socket))
+  })
+  t.teardown(
+    () =>
+      new Promise((resolve) => {
+        for (const socket of sockets) socket.destroy()
+        server.close(resolve)
+      })
+  )
+  return new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
 }

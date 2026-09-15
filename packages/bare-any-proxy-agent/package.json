@@ -30,7 +30,10 @@
   },
   "devDependencies": {
     "bare-url": "^2.5.4",
-    "brittle": "^3.19.0"
+    "brittle": "^3.19.0",
+    "bare-fetch": "^3.4.0",
+    "bare-https": "^3.1.0",
+    "bare-tcp": "^2.6.1"
   },
   "peerDependencies": {
     "bare-url": "*"

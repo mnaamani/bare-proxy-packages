@@ -79,8 +79,8 @@ worth knowing before porting code across:
 | ------------------ | --------------------------------------------------- | ------------------------------------------------------------------ |
 | base class         | `agent-base`'s `Agent`, over `http.Agent`           | `bare-http1`'s `Agent`                                             |
 | hook               | `connect(req, opts)` returning a socket or an agent | `createConnection(opts)` returning a socket                        |
-| target protocol    | `opts.secureEndpoint`, added by `agent-base`        | not passed to the agent                                            |
-| one agent for both | yes — the class reads `secureEndpoint`              | no — an agent per target protocol, hence the pair                  |
+| target protocol    | `opts.secureEndpoint`, added by `agent-base`        | `opts.protocol`                                                    |
+| one agent for both | yes — the class reads `secureEndpoint`              | a linked pair delegates by target protocol                         |
 | handshake timeout  | `opts.timeout`                                      | `opts.handshakeTimeout` (`timeout` is bare-http1's socket timeout) |
 
 Nothing in the Node stack can be reused as it stands: Bare has no `net`, `tls` or `http`
@@ -98,3 +98,6 @@ proxy that only accepts literal addresses, say) has to do that lookup itself.
 ## Licence
 
 Apache-2.0
+
+The pair delegates scheme-changing redirects using `opts.protocol`, including HTTPS on
+nonstandard ports. This requires `bare-http1` 4.6.2 and `bare-https` 3.1.0 or newer.

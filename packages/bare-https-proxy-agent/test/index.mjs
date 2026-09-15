@@ -129,9 +129,11 @@ test('a header value that would end the line early is refused', async (t) => {
 // which is what a redirect through bare-fetch does.
 test('a plain http tunnel to port 443 is refused, not downgraded', async (t) => {
   const proxy = await connectProxy(t)
+  const agent = new HttpsProxyHTTPAgent(`http://127.0.0.1:${proxy.port}`)
+  t.teardown(() => agent.destroy())
 
   const err = await fetch('https://secret.example/vault', {
-    agent: agentsFor(t, proxy.port).http
+    agent
   }).then(
     () => null,
     (err) => proxyErrorIn(err) ?? err

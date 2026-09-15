@@ -14,6 +14,7 @@ import {
   authority,
   hasCredentials,
   parseProxyUrl,
+  pairAgents,
   proxyErrorIn,
   proxyName
 } from 'bare-proxy-agent'
@@ -153,10 +154,7 @@ export class SocksProxyHTTPSAgent extends ProxyHTTPSAgent {
 
 // Both at once, which is what a program routing all of its traffic wants.
 export function createAgents(proxy, opts) {
-  return {
-    http: new SocksProxyHTTPAgent(proxy, opts),
-    https: new SocksProxyHTTPSAgent(proxy, opts)
-  }
+  return pairAgents(new SocksProxyHTTPAgent(proxy, opts), new SocksProxyHTTPSAgent(proxy, opts))
 }
 
 export { ProxyError, proxyErrorIn, Reader }

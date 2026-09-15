@@ -31,6 +31,11 @@ const agents = proxy ? createAgents(proxy) : null
 const response = await fetch(target, { agent: agents?.https })
 ```
 
+Pairs automatically select their HTTP or HTTPS member for scheme-changing redirects,
+including nonstandard ports, using the target protocol supplied by `bare-http1` 4.6.2 and
+`bare-https` 3.1.0 or newer. A standalone agent rejects an incompatible explicit scheme.
+The configured proxy stays the same across redirects.
+
 Each package's README has its own reference, and [`examples/`](examples) has programs that
 run: routing from the environment, a `CONNECT` tunnel, SOCKS5 without a local DNS lookup, a
 websocket through a proxy, teaching the base a protocol of your own, and getting the reason

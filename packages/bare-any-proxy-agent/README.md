@@ -103,3 +103,7 @@ nothing here is shaped to rule it out later.
 ## Licence
 
 Apache-2.0
+
+The returned agents are linked: scheme-changing redirects select the matching member
+before pooling or forwarding, including on nonstandard ports. This requires `bare-http1`
+4.6.2 and `bare-https` 3.1.0 or newer. The configured proxy stays the same across redirects.

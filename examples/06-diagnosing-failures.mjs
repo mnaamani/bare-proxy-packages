@@ -13,7 +13,7 @@
 // are fixed by different people.
 import 'bare-fetch/global'
 import { createAgents as socksAgents } from 'bare-socks-proxy-agent'
-import { createAgents as connectAgents } from 'bare-https-proxy-agent'
+import { HttpsProxyHTTPAgent } from 'bare-https-proxy-agent'
 import { proxyErrorIn } from 'bare-proxy-agent'
 import { connectProxy, hosts, origin, silentPort, socks5Proxy } from './lib/toy-servers.mjs'
 
@@ -67,6 +67,7 @@ console.log()
 
 // ── the failures worth telling apart ─────────────────────────────────────────────────────
 
+const plaintext = new HttpsProxyHTTPAgent(`http://127.0.0.1:${http.port}`)
 const cases = [
   [
     'nothing is listening on the proxy port',
@@ -101,8 +102,8 @@ const cases = [
   ],
   [
     'an https: target reached the agent built for http:',
-    'https://origin.example/vault',
-    agents(connectAgents(`http://127.0.0.1:${http.port}`)).http
+    'https://origin.example:8443/vault',
+    plaintext
   ]
 ]
 
@@ -113,6 +114,7 @@ for (const [what, url, agent] of cases) {
   )
   console.log(`${what}\n  → ${err.message}\n`)
 }
+plaintext.destroy()
 
 // ── and a failure that is not the proxy's ────────────────────────────────────────────────
 

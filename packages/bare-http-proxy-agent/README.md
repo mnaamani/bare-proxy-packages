@@ -42,20 +42,17 @@ proxy that will not `CONNECT` to port 80 will forward this, and in exchange it s
 is forwarding. Nothing is added here beyond what the method needs — no user agent, no
 cookies — but nothing that was already in the request is hidden either.
 
-## An https: target is refused
+## Redirects and target schemes
 
-Every agent for `http:` targets — this one, and the SOCKS and CONNECT ones — writes the
-request to whatever it opened with nothing negotiated on top. So a target on port 443 means
-an `https:` url has reached the agent built for `http:`, and carrying it would send in the
-clear what was asked for in confidence. That is refused with a `ProxyError` before anything
-is written.
+A standalone agent rejects an incompatible explicit target scheme with `ProxyError`,
+including HTTPS on nonstandard ports. Use the linked pair from `createAgents()` in
+`bare-any-proxy-agent` to route HTTP requests by forwarding and HTTPS requests by CONNECT.
+The CONNECT package's own pair tunnels both kinds of target. Pairs delegate before pooling
+or rewriting headers, so `bare-fetch` can safely retain its initial agent across redirects.
 
-It is not a hypothetical. `bare-fetch` follows redirects itself and keeps, for every hop, the
-agent it was handed — but an agent under bare-http1 _is_ the scheme, since it is the thing
-that decides whether TLS runs. So an `http:` url that redirects to an `https:` one arrives at
-the wrong agent. A caller that follows redirects itself should re-pick the agent per hop; one
-that cannot should treat a response whose final url changed scheme as a failure, because the
-guard only covers the default port.
+Automatic routing requires clients that pass `opts.protocol`: `bare-http1` 4.6.2 and
+`bare-https` 3.1.0 or newer. For older clients, follow redirects manually and select the
+agent before issuing each request. Checking the final response URL is too late.
 
 ## API
 

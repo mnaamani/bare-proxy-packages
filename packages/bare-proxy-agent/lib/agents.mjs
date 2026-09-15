@@ -23,9 +23,31 @@ export class ProxyHTTPAgent extends http.Agent {
     // so one of these left on an agent by mistake would silently redirect every request it
     // ever carries to somewhere the caller never named. Nothing else here is load-bearing
     // enough to be worth that.
-    const { handshakeTimeout, host, port, path, ...agentOpts } = opts
+    const { handshakeTimeout, host, port, path, protocol, ...agentOpts } = opts
     super({ keepAlive: 1000, timeout: 5000, ...agentOpts })
     this._tunnel = handshakeTimeout ? { ...tunnel, timeout: handshakeTimeout } : tunnel
+    this._redirectAgent = null
+  }
+
+  addRequest(req, opts) {
+    const secure = opts.protocol === 'https:' || opts.protocol === 'wss:'
+    const plain = opts.protocol === 'http:' || opts.protocol === 'ws:'
+    if ((secure && this._plaintext) || (plain && !this._plaintext)) {
+      if (this._redirectAgent) this._redirectAgent.addRequest(req, opts)
+      else {
+        queueMicrotask(() =>
+          req.destroy(
+            new ProxyError(
+              `${this.proxyUrl} was asked to carry an ${opts.protocol} target on port ${opts.port} — ` +
+                `use the ${secure ? 'https' : 'http'} agent for this request`
+            )
+          )
+        )
+      }
+      return false
+    }
+    super.addRequest(req, opts)
+    return true
   }
 
   // The proxy as its package parsed it, and the address it was configured with. Named after
@@ -64,18 +86,13 @@ export class ProxyHTTPAgent extends http.Agent {
   }
 }
 
-// A request this agent is given is written to whatever the handshake opened, with nothing
-// negotiated on top — so port 443 means an https: target has reached the agent built for
-// http:, and carrying it would send in the clear what was asked for in confidence.
-//
-// The way that happens is a redirect. bare-fetch follows them itself and keeps, for every
-// hop, the agent it was handed; but an agent under bare-http1 *is* the scheme, since it is
-// the thing that decides whether TLS runs. So an http: url that redirects to an https: one
-// arrives here. Refused, and refused from the handshake rather than from createConnection:
-// ProxySocket turns a throw here into a failed connection, which the request reports, while
-// a throw from createConnection comes out of the ClientRequest constructor, where bare-fetch
-// does not catch it.
+// Direct socket users may omit the scheme. Keep the conservative port-443 refusal for
+// those calls; HTTP requests with a protocol are routed before a socket is selected.
 function refuseSecretsInTheClear({ proxy, target }) {
+  if (target.protocol === 'http:' || target.protocol === 'ws:') return
+  if (target.protocol === 'https:' || target.protocol === 'wss:') {
+    throw new ProxyError(`${proxyName(proxy)} needs the https agent for ${target.protocol} targets`)
+  }
   if (Number(target.port) !== 443) return
   throw new ProxyError(
     `${proxyName(proxy)} was asked to carry a plain http request to port 443 of ` +
@@ -157,5 +174,13 @@ class SecureProxySocket extends tls.Socket {
 // The pair a caller usually wants: one agent for http urls, one for https, both tunnelling
 // through the same proxy. `tunnel` is `{ proxy, handshake }` — what ProxySocket takes.
 export function createAgents(tunnel, opts) {
-  return { http: new ProxyHTTPAgent(tunnel, opts), https: new ProxyHTTPSAgent(tunnel, opts) }
+  return pairAgents(new ProxyHTTPAgent(tunnel, opts), new ProxyHTTPSAgent(tunnel, opts))
+}
+
+// Select before consulting either connection pool or rewriting forwarding headers.
+// bare-fetch keeps its initial agent across redirects; each peer retains its own pool.
+export function pairAgents(http, https) {
+  http._redirectAgent = https
+  https._redirectAgent = http
+  return { http, https }
 }

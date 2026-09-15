@@ -16,6 +16,7 @@ import {
   createAgents,
   hasCredentials,
   parseProxyUrl,
+  pairAgents,
   proxyErrorIn,
   proxyName,
   type Handshake,
@@ -224,3 +225,11 @@ const target = 'https://origin.example'
 const found = env.getProxyForUrl(target)
 const agents = found ? any.createAgents(found) : null
 expect<ProxyHTTPSAgent | undefined>(agents?.https)
+
+const linked = pairAgents(
+  new forward.HttpProxyAgent(proxy),
+  new connect.HttpsProxyHTTPSAgent(proxy)
+)
+expect<forward.HttpProxyAgent>(linked.http)
+expect<connect.HttpsProxyHTTPSAgent>(linked.https)
+expect<ProxyAgentOptions>({ ca: Buffer.alloc(0) })

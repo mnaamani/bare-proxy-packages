@@ -89,7 +89,7 @@ export class HttpProxyAgent extends ProxyHTTPAgent {
   // the proxy to read as a request for itself. There is nothing here to test for: this
   // runs once per request, on a request that has not been written to yet.
   addRequest(req, opts) {
-    super.addRequest(req, opts)
+    if (super.addRequest(req, opts) === false) return
 
     req._path = absolute(req, opts)
 

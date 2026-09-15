@@ -44,49 +44,26 @@ Three differences follow from the signature alone:
   [`ProxySocket`](packages/bare-proxy-agent/lib/socket.mjs), a socket that is returned
   immediately and connects by running a handshake, rather than one you get after connecting.
 - **No delegation.** Node lets `connect()` return another agent, which is how
-  `pac-proxy-agent` dispatches per url. There is no equivalent, so a per-url decision has to
-  be made before an agent is chosen, not inside one.
+  `pac-proxy-agent` dispatches per url. There is no return-value equivalent. These agents delegate through
+  `addRequest(req, opts)` when a paired request changes scheme.
 
-## 3. The agent is never told whether the target is `https:`
+## 3. Target schemes and redirects
 
-This is the divergence with the largest visible cost.
+Node's `agent-base` adds `secureEndpoint`. The supported Bare HTTP clients pass
+`opts.protocol` instead (`bare-http1` 4.6.2 and `bare-https` 3.1.0).
+Each agent still owns either plaintext or TLS connections. `createAgents()` links the pair
+so a request with a different scheme is delegated in `addRequest()`, before looking in the
+connection pool or rewriting forwarding headers. `bare-fetch` can therefore retain the
+initial agent across HTTP/HTTPS redirects, including on nonstandard ports.
 
-`agent-base` puts `secureEndpoint` on the options it passes to `connect()`. That single flag
-is what lets one `SocksProxyAgent` serve both `http://` and `https://` targets: it looks at
-the flag and runs TLS, or doesn't.
+A standalone agent rejects an incompatible explicit scheme with `ProxyError`. Calls that
+omit `protocol` use the selected agent; the plaintext handshake conservatively rejects
+port 443 for those calls. Older clients that omit the scheme cannot support automatic
+scheme-changing redirects. Use the supported client versions, or follow redirects manually
+and select the appropriate agent before issuing each request.
 
-`bare-http1` passes nothing of the kind. The agent's options and the request's are merged and
-handed to `createConnection`, and the target's scheme is not among them. In Bare, the scheme
-_is_ the agent — `bare-https`'s `Agent` is a separate class that extends `bare-http1`'s and
-wraps whatever it opened in a TLS socket:
-
-```js
-class HTTPSAgent extends HTTPAgent {
-  createConnection(opts) {
-    return new HTTPSSocket(super.createConnection(opts), opts)
-  }
-}
-```
-
-So every proxy agent here must come in two, one per target scheme, and the caller picks:
-
-```js
-const agents = createAgents('socks5://127.0.0.1:1080')
-
-fetch('http://example.com', { agent: agents.http })
-fetch('https://example.com', { agent: agents.https })
-```
-
-That is the whole reason `createAgents()` returns a pair rather than an agent, and it ripples
-outward: [`bare-any-proxy-agent`](packages/bare-any-proxy-agent) cannot be Node's
-`ProxyAgent`, one object that resolves a proxy per request, because there is no per-request
-moment in which to resolve one.
-
-It also has a safety consequence. An `https:` url can reach the plain agent — a redirect does
-it, since `bare-fetch` follows redirects itself and reuses the agent it was given for every
-hop. Node's agent would notice via `secureEndpoint`; here nothing would, so
-`bare-proxy-agent` refuses a plaintext request to port 443 rather than send in the clear what
-was asked for in confidence.
+The pair uses a fixed proxy. It does not reevaluate environment or `no_proxy` rules at each
+redirect; applications needing that policy must perform that selection themselves.
 
 ## 4. TLS is the agent's job, and the wrapper is not exported
 
@@ -147,7 +124,7 @@ mistake would silently redirect every request that agent ever carries.
 | suspend / resume          | —                            | `agent.suspend()`, `agent.resume()`, `agent.suspended`  |
 | idle teardown             | —                            | every agent destroys its sockets on Bare's `idle` event |
 | `connect(req, opts)`      | added by `agent-base`        | —                                                       |
-| `secureEndpoint`          | added by `agent-base`        | —                                                       |
+| `secureEndpoint`          | added by `agent-base`        | `opts.protocol` instead                                 |
 
 The idle teardown is worth knowing when porting: a keep-alive pool in Node holds the process
 open unless its sockets are unref'd, whereas here the runtime going idle is what tears the
@@ -190,7 +167,7 @@ Worth saying, since the list above is long:
 
 | Node                                             | Why it cannot be matched here                                 |
 | ------------------------------------------------ | ------------------------------------------------------------- |
-| One agent for `http:` and `https:` targets       | No `secureEndpoint`; the scheme is the agent (§3)             |
+| One agent for `http:` and `https:` targets       | Paired agents delegate using `opts.protocol` (§3)             |
 | `connect(req, opts)`, async, may return an agent | Hook is a synchronous `createConnection(opts)` (§2)           |
 | `ProxyAgent` resolving a proxy per request       | Nothing per-request to resolve it in (§2, §3)                 |
 | PAC support via `pac-proxy-agent`                | Needs a script sandbox and resolver; also §2 (delegation)     |

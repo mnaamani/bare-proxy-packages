@@ -40,20 +40,17 @@ inside: `agents.https` negotiates TLS with the target through the tunnel, and th
 certificate is checked against the host that was asked for. Nothing is sent beyond what the
 method needs — no user agent, no cookies.
 
-## An https: target is refused
+## Redirects and target schemes
 
-Every agent for `http:` targets — this one, and the SOCKS and forwarding ones — writes the
-request to whatever it opened with nothing negotiated on top, which here means straight into
-the tunnel. So a target on port 443 means an `https:` url has reached the agent built for
-`http:`, and carrying it would send in the clear what was asked for in confidence. That is refused with a `ProxyError` before anything
-is written.
+A standalone agent rejects an incompatible explicit target scheme with `ProxyError`,
+including HTTPS on nonstandard ports. Use the linked pair from `createAgents()` in
+`bare-any-proxy-agent` to route HTTP requests by forwarding and HTTPS requests by CONNECT.
+The CONNECT package's own pair tunnels both kinds of target. Pairs delegate before pooling
+or rewriting headers, so `bare-fetch` can safely retain its initial agent across redirects.
 
-It is not a hypothetical. `bare-fetch` follows redirects itself and keeps, for every hop, the
-agent it was handed — but an agent under bare-http1 _is_ the scheme, since it is the thing
-that decides whether TLS runs. So an `http:` url that redirects to an `https:` one arrives at
-the wrong agent. A caller that follows redirects itself should re-pick the agent per hop; one
-that cannot should treat a response whose final url changed scheme as a failure, because the
-guard only covers the default port.
+Automatic routing requires clients that pass `opts.protocol`: `bare-http1` 4.6.2 and
+`bare-https` 3.1.0 or newer. For older clients, follow redirects manually and select the
+agent before issuing each request. Checking the final response URL is too late.
 
 ## API
 
@@ -99,8 +96,8 @@ worth knowing before porting code across:
 | ------------------ | --------------------------------------------------- | ------------------------------------------------------------------ |
 | base class         | `agent-base`'s `Agent`, over `http.Agent`           | `bare-http1`'s `Agent`                                             |
 | hook               | `connect(req, opts)` returning a socket or an agent | `createConnection(opts)` returning a socket                        |
-| target protocol    | `opts.secureEndpoint`, added by `agent-base`        | not passed to the agent                                            |
-| one agent for both | yes — the class reads `secureEndpoint`              | no — an agent per target protocol, hence the pair                  |
+| target protocol    | `opts.secureEndpoint`, added by `agent-base`        | `opts.protocol`                                                    |
+| one agent for both | yes — the class reads `secureEndpoint`              | a linked pair delegates by target protocol                         |
 | handshake timeout  | `opts.timeout`                                      | `opts.handshakeTimeout` (`timeout` is bare-http1's socket timeout) |
 
 Nothing in the Node stack can be reused as it stands: Bare has no `net`, `tls` or `http`

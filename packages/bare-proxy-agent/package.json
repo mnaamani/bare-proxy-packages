@@ -23,7 +23,7 @@
     "test": "brittle-bare test/index.mjs"
   },
   "dependencies": {
-    "bare-http1": "^4.6.0",
+    "bare-http1": "^4.6.2",
     "bare-stream": "^2.13.1",
     "bare-tcp": "^2.5.0",
     "bare-tls": "^3.1.7"

@@ -3,6 +3,7 @@ import URL from 'bare-url'
 import { Duplex } from 'bare-stream'
 import { Agent, type HTTPAgentOptions } from 'bare-http1'
 import { TCPSocketConnectOptions, TCPSocketOptions } from 'bare-tcp'
+import { TLSSocketOptions } from 'bare-tls'
 
 /**
  * A proxy url read into the parts an agent and a handshake need.
@@ -31,6 +32,8 @@ export interface Proxy {
 
 /** Where a request is going, as the handshake is told it. */
 export interface ProxyTarget {
+  /** The request scheme when supplied by the HTTP client. */
+  protocol?: string
   /** The target's hostname, unresolved. */
   host: string
   /** The target's port. */
@@ -194,6 +197,8 @@ export interface Tunnel {
 
 /** Options a {@link ProxySocket} is built with, as an http agent passes them. */
 export interface ProxySocketOptions {
+  /** The request scheme when supplied by the HTTP client. */
+  protocol?: string
   /** The target's host, which reaches the handshake as `target.host`. */
   host?: string
   /** The target's port, which reaches the handshake as `target.port`. */
@@ -260,7 +265,7 @@ export class ProxySocket extends Duplex {
 
 /** Options the proxy agents take, which are `bare-http1`'s plus one. */
 export interface ProxyAgentOptions
-  extends HTTPAgentOptions, TCPSocketOptions, TCPSocketConnectOptions {
+  extends HTTPAgentOptions, TCPSocketOptions, TCPSocketConnectOptions, TLSSocketOptions {
   /**
    * How long the proxy has to answer its own handshake, in milliseconds.
    *
@@ -293,8 +298,8 @@ export class ProxyHTTPAgent extends Agent {
 
   /**
    * @param tunnel The proxy to reach and the handshake to speak to it.
-   * @param opts Passed to `bare-http1`'s `Agent`, less `handshakeTimeout`. `host`, `port`
-   *   and `path` are dropped: an agent's options beat a request's, so one left here by
+   * @param opts Passed to `bare-http1`'s `Agent`, less `handshakeTimeout`. `host`, `port`,
+   *   `path` and `protocol` are dropped: an agent's options beat a request's, so one left here by
    *   mistake would silently redirect every request the agent ever carries.
    */
   constructor(tunnel: Tunnel, opts?: ProxyAgentOptions)
@@ -313,11 +318,9 @@ export class ProxyHTTPAgent extends Agent {
    * overrides it must build on `super.tunnel` rather than on the underlying tunnel, or it
    * drops the refusal described below.
    *
-   * On this class, rather than on a protocol's, the handshake is wrapped with one refusal:
-   * a target on port 443 means an `https:` url has reached the agent built for `http:`, and
-   * carrying it would send in the clear what was asked for in confidence. A redirect is how
-   * that happens, since `bare-fetch` follows redirects itself and keeps the agent it was
-   * handed for every hop, while an agent under `bare-http1` *is* the scheme.
+   * The handshake rejects explicit secure schemes. For connections with no scheme it
+   * conservatively rejects port 443. Requests are routed to a paired agent, or rejected
+   * when their scheme is incompatible, before consulting the connection pool.
    */
   get tunnel(): Tunnel
 }
@@ -352,11 +355,21 @@ export interface ProxyAgents<
  * The pair a caller usually wants: one agent for `http:` urls, one for `https:`, both
  * through the same proxy.
  *
- * Which of the two a request needs is the caller's to pick, because `bare-http1` tells an
- * agent nothing about where a request is going — see `NODE-COMPATIBILITY.md`.
+ * Pick the initial agent by target scheme. The pair routes subsequent requests using
+ * `opts.protocol`, including redirects followed by `bare-fetch` on nonstandard ports.
  *
  * @param tunnel The proxy to reach and the handshake to speak to it.
  * @param opts Passed to both agents.
  * @returns Both agents.
  */
 export function createAgents(tunnel: Tunnel, opts?: ProxyAgentOptions): ProxyAgents
+
+/**
+ * Links two agents so scheme-changing requests are delegated before pooling or rewriting
+ * headers. Used by every `createAgents()` factory. Each agent keeps its own connection
+ * pool; destroy both when finished. A request without `protocol` uses the selected agent.
+ */
+export function pairAgents<Http extends ProxyHTTPAgent, Https extends ProxyHTTPSAgent>(
+  http: Http,
+  https: Https
+): ProxyAgents<Http, Https>

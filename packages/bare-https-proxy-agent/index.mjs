@@ -23,6 +23,7 @@ import {
   authority,
   hasCredentials,
   parseProxyUrl,
+  pairAgents,
   proxyErrorIn,
   proxyName
 } from 'bare-proxy-agent'
@@ -140,10 +141,7 @@ export class HttpsProxyHTTPSAgent extends ProxyHTTPSAgent {
 
 // Both at once, which is what a program routing all of its traffic wants.
 export function createAgents(proxy, opts) {
-  return {
-    http: new HttpsProxyHTTPAgent(proxy, opts),
-    https: new HttpsProxyHTTPSAgent(proxy, opts)
-  }
+  return pairAgents(new HttpsProxyHTTPAgent(proxy, opts), new HttpsProxyHTTPSAgent(proxy, opts))
 }
 
 export { ProxyError, proxyErrorIn, Reader }
