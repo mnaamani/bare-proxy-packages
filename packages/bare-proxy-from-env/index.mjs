@@ -93,10 +93,8 @@ export function parseNoProxy(value) {
   for (const entry of listed) {
     if (entry.includes('/')) {
       const net = parseCidr(entry)
-      if (net) {
-        nets.push(net)
-        continue
-      }
+      if (net) nets.push(net)
+      continue
     }
     // A single colon is a port to drop. Several means an IPv6 address, which the convention
     // says to write without brackets, and which has no port on it to drop.
@@ -164,9 +162,13 @@ function parseIPv4(value) {
 function parseCidr(entry) {
   const slash = entry.lastIndexOf('/')
   const base = parseIPv4(entry.slice(0, slash))
-  const width = Number(entry.slice(slash + 1))
   if (base === null) return null
-  if (!Number.isInteger(width) || width < 0 || width > 32) return null
+  const prefix = entry.slice(slash + 1)
+  // Number('') is zero, and Number also accepts signs, exponents and hex.
+  // A CIDR prefix must be written as decimal digits before it can exempt traffic.
+  if (!/^\d+$/.test(prefix)) return null
+  const width = Number(prefix)
+  if (width > 32) return null
   const mask = width === 0 ? 0 : (0xffffffff << (32 - width)) >>> 0
   return { base, mask }
 }

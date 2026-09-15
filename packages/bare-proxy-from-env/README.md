@@ -65,6 +65,9 @@ same terms.
 
 #### `noProxy()` · `parseNoProxy(value)` · `bypassed(bypass, hostname)`
 
+Malformed CIDR entries are ignored. Prefixes must be decimal digits from `0` to `32`;
+an omitted prefix never means `/0`.
+
 `no_proxy`, parsed once and asked about many times. `*` alone means every host; an entry
 matches the hostname itself or any domain under it (`local.com` covers `www.local.com` but
 not `www.notlocal.com`); an entry may be an address or a CIDR block instead of a name; a

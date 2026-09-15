@@ -69,6 +69,25 @@ test('no_proxy carves holes by name, by domain, by address and by block', (t) =>
   t.absent(bypassed(bypass, 'origin.example'))
 })
 
+test('malformed CIDR entries never bypass the proxy', (t) => {
+  const invalid = ['', ' ', '+0', '-0', '0x0', '0e0', '0.0', '33', '-1', 'NaN', '8/0']
+  for (const prefix of invalid) {
+    const bypass = parseNoProxy(`10.0.0.0/${prefix}`)
+    t.absent(bypassed(bypass, '203.0.113.5'), `invalid prefix ${JSON.stringify(prefix)}`)
+    t.absent(bypassed(bypass, '10.0.0.1'), 'even an address inside the intended network')
+  }
+  t.teardown(withEnv({ http_proxy: 'http://proxy.lan:3128', no_proxy: '10.0.0.0/' }))
+  t.is(getProxyForUrl('http://203.0.113.5'), 'http://proxy.lan:3128')
+  t.ok(bypassed(parseNoProxy('10.0.0.0/, local.com'), 'local.com'), 'valid entries still work')
+})
+
+test('CIDR boundary prefixes remain supported when explicitly written', (t) => {
+  t.ok(bypassed(parseNoProxy('0.0.0.0/0'), '203.0.113.5'))
+  t.absent(bypassed(parseNoProxy('0.0.0.0/0'), 'origin.example'))
+  t.ok(bypassed(parseNoProxy('203.0.113.5/32'), '203.0.113.5'))
+  t.absent(bypassed(parseNoProxy('203.0.113.5/32'), '203.0.113.6'))
+})
+
 test('no_proxy of * sends everything direct, and an unset one nothing', (t) => {
   t.ok(bypassed(parseNoProxy('*'), 'origin.example'))
   t.is(parseNoProxy(''), null)
