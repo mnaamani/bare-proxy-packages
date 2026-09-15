@@ -144,11 +144,13 @@ export class Reader {
    * Everything up to and including `delimiter`, which is how an http response head ends.
    *
    * @param delimiter What to read up to, included in what comes back.
+   * @param maxBytes Maximum bytes through the delimiter, default 16384. Target bytes
+   *   after the delimiter do not count toward this limit.
    * @returns The bytes read, delimiter and all.
    * @throws {@link ProxyError} when the socket fails or the proxy closes the connection
-   *   before the delimiter arrives.
+   *   before the delimiter arrives, or when the limit is reached without the delimiter.
    */
-  until(delimiter: string | Buffer): Promise<Buffer>
+  until(delimiter: string | Buffer, maxBytes?: number): Promise<Buffer>
 
   /**
    * Stops reading and hands back anything read past the end of the handshake.

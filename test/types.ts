@@ -68,6 +68,7 @@ const handshake: Handshake = async ({ socket, reader, proxy, target }: Handshake
   expect<Buffer>(await reader.read(2))
   expect<Buffer>(await reader.until('\r\n\r\n'))
   expect<Buffer>(await reader.until(Buffer.from('\n')))
+  expect<Buffer>(await reader.until('\n', 32768))
   expect<Buffer>(reader.release())
   if (proxy.host === '') throw new ProxyError('nowhere to go')
 }

@@ -104,6 +104,19 @@ test('a port that is listening but answers no http is reported as one', async (t
 // The CONNECT head is built by hand rather than by bare-http1, so nothing upstream has
 // checked it for the characters that end a line early. A value carrying CR or LF could add a
 // second CONNECT, to somewhere else entirely.
+test(
+  'an oversized CONNECT response fails before the handshake timeout',
+  { timeout: 3000 },
+  async (t) => {
+    const port = await listener(t, (socket) => {
+      socket.once('data', () => socket.write('HTTP/1.1 200 OK\r\nX-Flood: ' + 'x'.repeat(20000)))
+    })
+    const err = await failure(t, port)
+    t.is(err.code, 'PROXY_ERROR')
+    t.ok(err.message.includes('handshake exceeds 16384 bytes'))
+  }
+)
+
 test('a header value that would end the line early is refused', async (t) => {
   const proxy = await connectProxy(t)
   const agents = createAgents(`http://127.0.0.1:${proxy.port}`, {

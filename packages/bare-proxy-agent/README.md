@@ -64,6 +64,12 @@ Yours to write. `reader.read(n)` resolves exactly `n` bytes and `reader.until(de
 everything up to and including it; anything read past the end of the handshake is kept and
 handed to the stream, so a target that answers immediately loses nothing.
 
+`reader.until(delimiter, maxBytes)` limits the bytes through the delimiter to 16384 by
+default, rejecting larger responses with `ProxyError`. A custom protocol can specify a
+different positive limit. Target bytes following a valid delimiter do not count against
+it. Reads scan chunks incrementally and pause the socket between requests; only one read
+may be pending at a time.
+
 #### `parseProxyUrl(url, ports)`
 
 `{ protocol, host, port, username, password, secure }`, with `ports` giving the default port

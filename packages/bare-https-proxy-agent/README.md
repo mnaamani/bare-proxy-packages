@@ -78,6 +78,10 @@ port is one word that only the person configuring it knows.
 
 The CONNECT handshake itself, for use with `bare-proxy-agent` directly.
 
+CONNECT response headers, including the final blank line, are limited to 16 KiB. An
+oversized or unterminated response fails with `ProxyError` as soon as that limit is reached.
+Target data arriving after valid headers is preserved separately.
+
 #### `ProxyError` · `proxyErrorIn(err)`
 
 Re-exported from [`bare-proxy-agent`](../bare-proxy-agent). `bare-fetch` reports every

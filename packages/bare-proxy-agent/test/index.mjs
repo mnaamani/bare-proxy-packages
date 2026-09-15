@@ -3,6 +3,7 @@
 // depend on this one, and each tests its own protocol.
 import 'bare-fetch/global'
 import test from 'brittle'
+import './reader.mjs'
 import tcp from 'bare-tcp'
 import http from 'bare-http1'
 import {
