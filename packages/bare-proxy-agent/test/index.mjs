@@ -56,6 +56,37 @@ test('a proxy is named by the address it was configured with, never its password
   t.is(authority({ host: '::1', port: 443 }), '[::1]:443', 'an ipv6 host goes back in brackets')
 })
 
+test('proxy URL validation errors never echo credentials', (t) => {
+  const urls = [
+    'http://alice:s3cret@proxy.lan:8080/path',
+    'http://alice:s3cret@proxy.lan:8080?password=s3cret',
+    'http://alice:s3cret@proxy.lan:8080#s3cret',
+    'http://alice:s3cret@proxy.lan',
+    'http://alice:s3cret@proxy.lan:invalid',
+    'http://alice:s3cret@[invalid]:8080',
+    'demo://alice:s3cret@:8080',
+    'ftp://alice:s3cret@proxy.lan:21',
+    'http://alice:s3cret%ZZ@proxy.lan:8080',
+    'http://alice%ZZ:s3cret@proxy.lan:8080',
+    'alice:s3cret@not a URL'
+  ]
+  for (const url of urls) {
+    let error
+    try {
+      parseProxyUrl(url, ['http:', 'demo:'])
+    } catch (err) {
+      error = err
+    }
+    t.ok(error instanceof Error, 'invalid proxy rejected')
+    t.absent(/alice|s3cret/.test(String(error)), 'credentials are absent from the error')
+  }
+  t.exception.all(
+    () => parseProxyUrl('http://alice:s3cret@proxy.lan:8080/path', ['http:']),
+    /host and a port only: http:\/\/proxy.lan:8080/,
+    'a parsed URL still names the address to fix'
+  )
+})
+
 test('a proxy error is found again however deeply it has been wrapped', (t) => {
   const proxied = new ProxyError('the proxy said no')
   const wrapped = new Error('Network error', { cause: new Error('lost', { cause: proxied }) })

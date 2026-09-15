@@ -18,28 +18,37 @@ export function parseProxyUrl(value, schemes) {
   try {
     url = new URL(raw)
   } catch {
-    throw new Error(`not a proxy url: ${value}`)
+    // An invalid URL cannot be reliably split into credentials and address.
+    throw new Error('not a proxy url')
   }
   if (!schemes.includes(url.protocol)) {
     const named = schemes.map((scheme) => `${scheme}//`).join(', ')
-    throw new Error(`unsupported proxy scheme ${url.protocol} — use ${named}`)
+    throw new Error(`unsupported proxy scheme — use ${named}`)
   }
-  if (!url.hostname) throw new Error(`the proxy url names no host: ${value}`)
+  const name = `${url.protocol}//${url.host}`
+  if (!url.hostname) throw new Error(`the proxy url names no host: ${name}`)
   if ((url.pathname && url.pathname !== '/') || url.search || url.hash) {
-    throw new Error(`a proxy url is a host and a port only: ${value}`)
+    throw new Error(`a proxy url is a host and a port only: ${name}`)
   }
   const port = writtenPort(raw, url)
   if (port === null) {
-    throw new Error(`the proxy url names no port: ${value} — write the one you mean`)
+    throw new Error(`the proxy url names no port: ${name} — write the one you mean`)
   }
 
+  let username, password
+  try {
+    username = decodeURIComponent(url.username)
+    password = decodeURIComponent(url.password)
+  } catch {
+    throw new Error(`invalid percent-encoding in proxy credentials for ${name}`)
+  }
   return {
     protocol: url.protocol,
     // WHATWG keeps an IPv6 host in its brackets; every socket api wants it without them.
     host: url.hostname.replace(/^\[|\]$/g, ''),
     port,
-    username: decodeURIComponent(url.username),
-    password: decodeURIComponent(url.password),
+    username,
+    password,
     // Whether the first hop is itself TLS, which is the base's business rather than any one
     // handshake's. Set by whoever parsed the url — an https:// proxy is one.
     secure: false

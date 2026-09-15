@@ -67,7 +67,7 @@ test('a URL is taken as readily as a string', (t) => {
 })
 
 test('a scheme nothing here speaks is refused, with the ones it does named', (t) => {
-  t.exception.all(() => parse('ftp://127.0.0.1:21'), /unsupported proxy scheme ftp:/)
+  t.exception.all(() => parse('ftp://127.0.0.1:21'), /unsupported proxy scheme/)
   t.exception.all(
     () => parse('ftp://127.0.0.1:21'),
     /socks5:\/\/, socks5h:\/\/, http:\/\/, https:\/\//
