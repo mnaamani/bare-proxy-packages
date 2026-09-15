@@ -52,3 +52,9 @@ jobs:
 
       - name: Test
         run: npm test
+
+      # The examples start the proxies they go through and shut them down again, so there
+      # is nothing to set up and no reason for them not to run on every push. Examples rot
+      # faster than anything else in a repository, because nothing is watching them.
+      - name: Examples
+        run: npm run examples

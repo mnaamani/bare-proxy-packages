@@ -31,7 +31,14 @@ const agents = proxy ? createAgents(proxy) : null
 const response = await fetch(target, { agent: agents?.https })
 ```
 
-Each package's README has its own reference.
+Each package's README has its own reference, and [`examples/`](examples) has programs that
+run: routing from the environment, a `CONNECT` tunnel, SOCKS5 without a local DNS lookup, a
+websocket through a proxy, teaching the base a protocol of your own, and getting the reason
+out of a failure. Each starts the proxy it goes through, so there is nothing to set up.
+
+```sh
+bare examples/01-from-env.mjs
+```
 
 ## Types
 
@@ -58,6 +65,7 @@ npm install
 npm i -g bare-runtime   # the tests run under Bare
 npm test                # every workspace
 npm test --workspace bare-socks-proxy-agent
+npm run examples        # every example, which CI does too
 npm run lint            # prettier, lunte, and the type checks above
 ```
 
