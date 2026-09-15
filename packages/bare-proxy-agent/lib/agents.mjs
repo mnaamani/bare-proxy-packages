@@ -100,6 +100,30 @@ export class ProxyHTTPSAgent extends ProxyHTTPAgent {
 // What bare-https wraps its own sockets in, which its exports do not reach: a TLS socket
 // that passes the socket-level calls an http agent makes down to the connection underneath.
 class SecureProxySocket extends tls.Socket {
+  constructor(socket, opts) {
+    super(socket, opts)
+    const ontimeout = () => this.emit('timeout')
+    socket.on('timeout', ontimeout)
+    this.once('close', () => socket.off('timeout', ontimeout))
+  }
+
+  _onclose() {
+    // bare-tls leaves its opening callback pending on a clean transport close.
+    // Settle it so an interrupted TLS handshake can finish destroying as well.
+    if (this._pendingOpen) {
+      this._onerror(new ProxyError('the connection closed during the TLS handshake'))
+    }
+    super._onclose()
+  }
+
+  _onend() {
+    if (this._pendingOpen) {
+      this._onerror(new ProxyError('the connection ended during the TLS handshake'))
+    } else {
+      super._onend()
+    }
+  }
+
   setKeepAlive(...args) {
     this.socket.setKeepAlive(...args)
     return this
@@ -110,8 +134,12 @@ class SecureProxySocket extends tls.Socket {
     return this
   }
 
-  setTimeout(...args) {
-    this.socket.setTimeout(...args)
+  setTimeout(ms, ontimeout) {
+    if (ontimeout) {
+      if (ms === 0) this.off('timeout', ontimeout)
+      else this.once('timeout', ontimeout)
+    }
+    this.socket.setTimeout(ms)
     return this
   }
 

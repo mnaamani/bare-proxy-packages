@@ -8,6 +8,7 @@ import http from 'bare-http1'
 import {
   ProxyError,
   ProxyHTTPAgent,
+  ProxyHTTPSAgent,
   ProxySocket,
   authority,
   createAgents,
@@ -104,15 +105,76 @@ test('the http agent refuses to carry a plain request to port 443', async (t) =>
   t.alike(proxy.asked, [], 'and the handshake was never spoken')
 })
 
-test('the https agent is the one that may, since it is the one that runs TLS', async (t) => {
-  const proxy = await demoProxy(t)
-  const agents = agentsFor(t, proxy.port)
+test(
+  'the https agent is the one that may, since it is the one that runs TLS',
+  { timeout: 3000 },
+  async (t) => {
+    const targetPort = await listener(t, (socket) => socket.once('data', () => socket.destroy()))
+    const proxy = await demoProxy(t)
+    const agents = agentsFor(t, proxy.port)
 
-  // No TLS server behind the demo proxy, so this fails — but at the handshake having been
-  // spoken, which is the half being asserted.
-  await fetch('https://secret.example/vault', { agent: agents.https }).catch(() => {})
+    // No TLS server behind the demo proxy, so this fails — but at the handshake having been
+    // spoken, which is the half being asserted.
+    await fetch(`https://secret.example:${targetPort}/vault`, { agent: agents.https }).catch(
+      () => {}
+    )
 
-  t.alike(proxy.asked, ['secret.example:443'])
+    t.alike(proxy.asked, [`secret.example:${targetPort}`])
+  }
+)
+
+test(
+  'a stalled TLS handshake reports the socket timeout to the request',
+  { timeout: 3000 },
+  async (t) => {
+    const port = await listener(t, (socket) => socket.resume())
+    const agent = new ProxyHTTPSAgent(
+      {
+        proxy: parseProxyUrl(`demo://127.0.0.1:${port}`, SCHEMES),
+        handshake() {}
+      },
+      { timeout: 50 }
+    )
+    t.teardown(() => agent.destroy())
+
+    const req = http.get({ host: 'secret.example', port: 443, agent })
+    req.on('error', () => {})
+    await new Promise((resolve) => {
+      req.once('timeout', () => {
+        t.pass('the request receives the underlying timeout during TLS negotiation')
+        req.destroy()
+      })
+      req.once('close', resolve)
+    })
+  }
+)
+
+test('TLS socket timeout callbacks run once on the wrapper', { timeout: 3000 }, async (t) => {
+  const port = await listener(t, (socket) => socket.resume())
+  const agent = new ProxyHTTPSAgent({
+    proxy: parseProxyUrl(`demo://127.0.0.1:${port}`, SCHEMES),
+    handshake() {}
+  })
+  t.teardown(() => agent.destroy())
+  const socket = agent.createConnection({ host: 'secret.example', port: 443 })
+  socket.on('error', () => {})
+  t.teardown(() => socket.destroy())
+  let calls = 0
+  const cancelled = () => t.fail('disabled timeout callback ran')
+  socket.setTimeout(50, cancelled).setTimeout(0, cancelled)
+  await new Promise((resolve) => {
+    socket.setTimeout(50, function () {
+      calls++
+      t.is(this, socket)
+      resolve()
+    })
+  })
+  socket.socket.emit('timeout')
+  t.is(calls, 1)
+  const closed = new Promise((resolve) => socket.once('close', resolve))
+  socket.destroy()
+  await closed
+  t.is(socket.socket.listenerCount('timeout'), 0, 'the relay is removed on close')
 })
 
 test('bytes the target already sent are kept, not lost with the handshake', async (t) => {
@@ -198,6 +260,7 @@ function demoProxy(t, { greeting = '' } = {}) {
 
       upstream = tcp.createConnection({ port: Number(to.split(':')[1]), host: '127.0.0.1' })
       upstream.on('data', (chunk) => socket.write(chunk))
+      upstream.on('end', () => socket.end())
       upstream.on('error', () => socket.destroy())
       upstream.on('close', () => socket.destroy())
       socket.on('close', () => upstream.destroy())
