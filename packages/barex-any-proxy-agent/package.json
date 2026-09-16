@@ -1,0 +1,63 @@
+{
+  "name": "barex-any-proxy-agent",
+  "version": "0.1.0",
+  "description": "One entry point for every proxy scheme Bare speaks \u2014 socks5, socks5h, http, https \u2014 picking the agent a proxy url calls for",
+  "main": "index.mjs",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
+    "./package": "./package.json"
+  },
+  "files": [
+    "index.mjs",
+    "index.d.ts",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "brittle-bare test/index.mjs"
+  },
+  "dependencies": {
+    "barex-http-proxy-agent": "^0.1.0",
+    "barex-https-proxy-agent": "^0.1.0",
+    "barex-proxy-agent": "^0.1.0",
+    "barex-socks-proxy-agent": "^0.1.0"
+  },
+  "devDependencies": {
+    "bare-url": "^2.5.4",
+    "brittle": "^3.19.0",
+    "bare-fetch": "^3.4.0",
+    "bare-https": "^3.1.0",
+    "bare-tcp": "^2.6.1"
+  },
+  "peerDependencies": {
+    "bare-url": "*"
+  },
+  "peerDependenciesMeta": {
+    "bare-url": {
+      "optional": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mnaamani/bare-proxy-packages.git",
+    "directory": "packages/barex-any-proxy-agent"
+  },
+  "author": "Mokhtar Naamani",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/mnaamani/bare-proxy-packages/issues"
+  },
+  "keywords": [
+    "bare",
+    "proxy",
+    "agent",
+    "socks5",
+    "http",
+    "https"
+  ]
+}

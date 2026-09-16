@@ -27,12 +27,12 @@ import {
   type ProxySocketOptions,
   type ProxyTarget,
   type Tunnel
-} from 'bare-proxy-agent'
-import * as socks from 'bare-socks-proxy-agent'
-import * as connect from 'bare-https-proxy-agent'
-import * as forward from 'bare-http-proxy-agent'
-import * as any from 'bare-any-proxy-agent'
-import * as env from 'bare-proxy-from-env'
+} from 'barex-proxy-agent'
+import * as socks from 'barex-socks-proxy-agent'
+import * as connect from 'barex-https-proxy-agent'
+import * as forward from 'barex-http-proxy-agent'
+import * as any from 'barex-any-proxy-agent'
+import * as env from 'barex-proxy-from-env'
 
 // Asserts a type rather than a value: the call compiles only when what it is handed is
 // assignable to T. Nothing here is ever run.
@@ -40,7 +40,7 @@ function expect<T>(value: T): void {
   void value
 }
 
-// bare-proxy-agent ───────────────────────────────────────────────────────────────────────
+// barex-proxy-agent ───────────────────────────────────────────────────────────────────────
 
 const proxy: Proxy = parseProxyUrl('demo://127.0.0.1:1080', ['demo:'])
 expect<string>(proxy.protocol)
@@ -126,7 +126,7 @@ class DemoAgent extends ProxyHTTPAgent {
 }
 expect<string>(new DemoAgent('demo://127.0.0.1:1080').proxyUrl)
 
-// bare-socks-proxy-agent ─────────────────────────────────────────────────────────────────
+// barex-socks-proxy-agent ─────────────────────────────────────────────────────────────────
 
 expect<string[]>(socks.SCHEMES)
 expect<Proxy>(socks.parse('socks5://127.0.0.1:1080'))
@@ -144,7 +144,7 @@ new socks.SocksProxyHTTPSAgent(new URL('socks5://127.0.0.1:1080'), { keepAlive: 
 expect<ProxyError | null>(socks.proxyErrorIn(err))
 expect<socks.ProxyLike>('socks5://127.0.0.1:1080')
 
-// bare-https-proxy-agent ─────────────────────────────────────────────────────────────────
+// barex-https-proxy-agent ─────────────────────────────────────────────────────────────────
 
 expect<string[]>(connect.SCHEMES)
 expect<Proxy>(connect.parse('http://127.0.0.1:3128'))
@@ -165,7 +165,7 @@ const rotating: connect.HttpsProxyAgentOptions = {
 }
 new connect.HttpsProxyHTTPSAgent('https://proxy.lan:443', rotating)
 
-// bare-http-proxy-agent ──────────────────────────────────────────────────────────────────
+// barex-http-proxy-agent ──────────────────────────────────────────────────────────────────
 
 expect<string[]>(forward.SCHEMES)
 expect<Proxy>(forward.parse('http://127.0.0.1:3128'))
@@ -179,7 +179,7 @@ expect<forward.ProxyHeaders>(forwarding.proxyHeaders)
 forwarding.proxyHeaders = () => ({ 'Proxy-Probe': 'again' })
 new forward.HttpProxyAgent(forward.parse('https://proxy.lan:443'))
 
-// bare-any-proxy-agent ───────────────────────────────────────────────────────────────────
+// barex-any-proxy-agent ───────────────────────────────────────────────────────────────────
 
 expect<string[]>(any.protocols)
 expect<Proxy>(any.parse('socks5://127.0.0.1:1080'))
@@ -191,7 +191,7 @@ expect<ProxyHTTPAgent>(anyAgents.http)
 expect<ProxyHTTPSAgent>(anyAgents.https)
 any.createAgents(any.parse('http://127.0.0.1:3128'), { headers: () => ({ A: 1 }) })
 
-// bare-proxy-from-env ────────────────────────────────────────────────────────────────────
+// barex-proxy-from-env ────────────────────────────────────────────────────────────────────
 
 expect<env.ProxySetting | null>(env.fromEnv('https_proxy', 'HTTPS_PROXY'))
 expect<env.ProxySetting | null>(env.proxyForProtocol('https:'))

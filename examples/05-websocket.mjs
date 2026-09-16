@@ -12,13 +12,13 @@
 // `agents.http`, and `wss:` is https, so it takes `agents.https`.
 import http from 'bare-http1'
 import ws from 'bare-ws'
-import { createAgents } from 'bare-https-proxy-agent'
+import { createAgents } from 'barex-https-proxy-agent'
 import { connectProxy, hosts } from './lib/toy-servers.mjs'
 
 const relay = await echoRelay()
 
 // `no_proxy` and friends have nothing to say about websockets — there is no `ws_proxy` in
-// the convention — which is why `bare-proxy-from-env` reads `ws:` as `http:` and `wss:` as
+// the convention — which is why `barex-proxy-from-env` reads `ws:` as `http:` and `wss:` as
 // `https:`. See examples/01-from-env.mjs.
 const proxy = await connectProxy({ resolve: hosts({ 'relay.example': relay.port }) })
 

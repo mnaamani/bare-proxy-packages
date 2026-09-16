@@ -52,7 +52,7 @@ export async function origin(body = 'hello from the origin') {
 
 /**
  * An http proxy asked to forward: it reads a request in absolute-form, makes it onwards in
- * origin-form, and pipes the answer back. What `bare-http-proxy-agent` talks to.
+ * origin-form, and pipes the answer back. What `barex-http-proxy-agent` talks to.
  */
 export function forwardProxy({ resolve = null } = {}) {
   const asked = []
@@ -103,7 +103,7 @@ export function forwardProxy({ resolve = null } = {}) {
 
 /**
  * An http proxy asked for a tunnel with `CONNECT`, which carries whatever is written into
- * it and reads none of it. What `bare-https-proxy-agent` talks to.
+ * it and reads none of it. What `barex-https-proxy-agent` talks to.
  */
 export function connectProxy({ resolve = null, requireCredentials = false } = {}) {
   const asked = []
@@ -157,7 +157,7 @@ export function connectProxy({ resolve = null, requireCredentials = false } = {}
 
 /**
  * Enough of SOCKS5 (RFC 1928) to serve a client: greet, maybe authenticate, then connect
- * and pipe. What `bare-socks-proxy-agent` talks to.
+ * and pipe. What `barex-socks-proxy-agent` talks to.
  */
 export function socks5Proxy({ resolve = null, requireCredentials = false } = {}) {
   const asked = []

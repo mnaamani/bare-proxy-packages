@@ -17,7 +17,7 @@ Bare has no `http`, `https`, `net` or `tls` modules. There is
 The immediate consequence is that [`agent-base`](https://www.npmjs.com/package/agent-base) —
 the package every Node proxy agent is built on — cannot be used or ported cheaply. It
 subclasses `http.Agent` and reaches into its internals to do it. So
-[`bare-proxy-agent`](packages/bare-proxy-agent) exists: it is the `agent-base` layer of the
+[`barex-proxy-agent`](packages/barex-proxy-agent) exists: it is the `agent-base` layer of the
 Node stack, rewritten against `bare-http1`'s agent instead. That is why this workspace has
 six packages where Node's equivalent stack has five plus `agent-base`.
 
@@ -41,7 +41,7 @@ Three differences follow from the signature alone:
   cannot decide anything per request that is not already in `opts`.
 - **Synchronous.** It must return a socket now. A handshake that has to finish before the
   socket is usable cannot be awaited here — hence
-  [`ProxySocket`](packages/bare-proxy-agent/lib/socket.mjs), a socket that is returned
+  [`ProxySocket`](packages/barex-proxy-agent/lib/socket.mjs), a socket that is returned
   immediately and connects by running a handshake, rather than one you get after connecting.
 - **No delegation.** Node lets `connect()` return another agent, which is how
   `pac-proxy-agent` dispatches per url. There is no return-value equivalent. These agents delegate through
@@ -74,7 +74,7 @@ underneath, which an http agent calls and a bare `tls.Socket` does not forward �
 `bare-https` exports `Agent`, `globalAgent`, `Server`, `ClientRequest`, `createServer`,
 `request` and `get`, and nothing else.
 
-So `bare-proxy-agent` carries its own copy of that wrapper. In Node this problem does not
+So `barex-proxy-agent` carries its own copy of that wrapper. In Node this problem does not
 arise at all: `https-proxy-agent` gets the tunnel socket and hands it to `tls.connect`.
 
 ## 5. `bare-http1` refuses `https:`
@@ -138,7 +138,7 @@ Node's `http-proxy-agent` assigns `req.path` and calls `req.setHeader()` from `a
 
 That works under `bare-http1` 4.6 too — `ClientRequest` assigns `_path` and `_headers`
 before it calls `agent.addRequest`, and an edit made there does reach the wire (checked, not
-assumed), which is why [`bare-http-proxy-agent`](packages/bare-http-proxy-agent) requires
+assumed), which is why [`barex-http-proxy-agent`](packages/barex-http-proxy-agent) requires
 `^4.6.0` and does the rewrite in the same place Node does. What differs is only the
 spelling: `req._path` rather than `req.path`, and `req._headers` alongside `setHeader`,
 because `_header()` lowercases every name on its way out and two casings of one name would

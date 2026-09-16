@@ -12,7 +12,7 @@
 // privacy than it asked for, never less. A program that needs a local lookup — a proxy
 // that only accepts literal addresses, say — has to do it itself.
 import 'bare-fetch/global'
-import { SocksProxyHTTPAgent, createAgents, parse, proxyErrorIn } from 'bare-socks-proxy-agent'
+import { SocksProxyHTTPAgent, createAgents, parse, proxyErrorIn } from 'barex-socks-proxy-agent'
 import { hosts, origin, socks5Proxy } from './lib/toy-servers.mjs'
 
 const target = await origin()

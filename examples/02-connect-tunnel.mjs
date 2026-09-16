@@ -5,13 +5,13 @@
 // `CONNECT` is the method that turns an http proxy into a pipe: the proxy opens a socket to
 // where it was told, answers `200`, and from then on carries bytes without reading them.
 // That is what makes end-to-end TLS through a proxy possible, and it is what
-// `bare-https-proxy-agent` speaks.
+// `barex-https-proxy-agent` speaks.
 //
 // The target here is a plain http origin, so that everything is visible in the transcript.
 // A real `https:` target works the same way, with `agents.https` negotiating TLS inside the
 // tunnel the proxy opened — at which point the proxy is carrying ciphertext.
 import 'bare-fetch/global'
-import { createAgents, HttpsProxyHTTPAgent, proxyErrorIn } from 'bare-https-proxy-agent'
+import { createAgents, HttpsProxyHTTPAgent, proxyErrorIn } from 'barex-https-proxy-agent'
 import { connectProxy, hosts, origin } from './lib/toy-servers.mjs'
 
 const target = await origin()

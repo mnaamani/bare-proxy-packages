@@ -5,24 +5,28 @@ Proxy support for [Bare](https://github.com/holepunchto/bare): agents that `bare
 
 An npm workspace — each directory under `packages/` is published on its own.
 
-| Package                                                     | What it does                                                                         | Node counterpart                                                       |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| [`bare-any-proxy-agent`](packages/bare-any-proxy-agent)     | One entry point for every scheme below, picked from the proxy url                    | [`proxy-agent`](https://www.npmjs.com/package/proxy-agent)             |
-| [`bare-socks-proxy-agent`](packages/bare-socks-proxy-agent) | SOCKS5, and `socks5h` where the proxy resolves the target name                       | [`socks-proxy-agent`](https://www.npmjs.com/package/socks-proxy-agent) |
-| [`bare-http-proxy-agent`](packages/bare-http-proxy-agent)   | An http proxy asked to forward — the absolute-form half of Node's `http-proxy-agent` | [`http-proxy-agent`](https://www.npmjs.com/package/http-proxy-agent)   |
-| [`bare-https-proxy-agent`](packages/bare-https-proxy-agent) | HTTP `CONNECT` tunnels                                                               | [`https-proxy-agent`](https://www.npmjs.com/package/https-proxy-agent) |
-| [`bare-proxy-agent`](packages/bare-proxy-agent)             | The socket, agents and handshake plumbing the three above share                      | [`agent-base`](https://www.npmjs.com/package/agent-base)               |
-| [`bare-proxy-from-env`](packages/bare-proxy-from-env)       | Reads `http_proxy`, `https_proxy`, `ALL_PROXY` and `no_proxy`                        | [`proxy-from-env`](https://www.npmjs.com/package/proxy-from-env)       |
+| Package                                                       | What it does                                                                         | Node counterpart                                                       |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| [`barex-any-proxy-agent`](packages/barex-any-proxy-agent)     | One entry point for every scheme below, picked from the proxy url                    | [`proxy-agent`](https://www.npmjs.com/package/proxy-agent)             |
+| [`barex-socks-proxy-agent`](packages/barex-socks-proxy-agent) | SOCKS5, and `socks5h` where the proxy resolves the target name                       | [`socks-proxy-agent`](https://www.npmjs.com/package/socks-proxy-agent) |
+| [`barex-http-proxy-agent`](packages/barex-http-proxy-agent)   | An http proxy asked to forward — the absolute-form half of Node's `http-proxy-agent` | [`http-proxy-agent`](https://www.npmjs.com/package/http-proxy-agent)   |
+| [`barex-https-proxy-agent`](packages/barex-https-proxy-agent) | HTTP `CONNECT` tunnels                                                               | [`https-proxy-agent`](https://www.npmjs.com/package/https-proxy-agent) |
+| [`barex-proxy-agent`](packages/barex-proxy-agent)             | The socket, agents and handshake plumbing the three above share                      | [`agent-base`](https://www.npmjs.com/package/agent-base)               |
+| [`barex-proxy-from-env`](packages/barex-proxy-from-env)       | Reads `http_proxy`, `https_proxy`, `ALL_PROXY` and `no_proxy`                        | [`proxy-from-env`](https://www.npmjs.com/package/proxy-from-env)       |
 
 None of them is a drop-in port of its Node counterpart. [NODE-COMPATIBILITY.md](NODE-COMPATIBILITY.md)
 is the account of why: how `bare-http1` differs from Node's `http`, and which of those
 differences reach the surface of these packages.
 
-Most programs want `bare-any-proxy-agent` with `bare-proxy-from-env`:
+Most programs want `barex-any-proxy-agent` with `barex-proxy-from-env`:
+
+```
+npm i barex-any-proxy-agent barex-proxy-from-env
+```
 
 ```js
-import { getProxyForUrl } from 'bare-proxy-from-env'
-import { createAgents } from 'bare-any-proxy-agent'
+import { getProxyForUrl } from 'barex-proxy-from-env'
+import { createAgents } from 'barex-any-proxy-agent'
 
 const target = 'https://example.com'
 const proxy = getProxyForUrl(target)
@@ -69,7 +73,7 @@ npm run types   # tsc --noEmit over every .d.ts and the type tests,
 npm install
 npm i -g bare-runtime   # the tests run under Bare
 npm test                # every workspace
-npm test --workspace bare-socks-proxy-agent
+npm test --workspace barex-socks-proxy-agent
 npm run examples        # every example, which CI does too
 npm run lint            # prettier, lunte, and the type checks above
 ```

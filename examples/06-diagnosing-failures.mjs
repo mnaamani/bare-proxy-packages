@@ -12,9 +12,9 @@
 // it is the difference between "your proxy is not running" and "that host is down", which
 // are fixed by different people.
 import 'bare-fetch/global'
-import { createAgents as socksAgents } from 'bare-socks-proxy-agent'
-import { HttpsProxyHTTPAgent } from 'bare-https-proxy-agent'
-import { proxyErrorIn } from 'bare-proxy-agent'
+import { createAgents as socksAgents } from 'barex-socks-proxy-agent'
+import { HttpsProxyHTTPAgent } from 'barex-https-proxy-agent'
+import { proxyErrorIn } from 'barex-proxy-agent'
 import { connectProxy, hosts, origin, silentPort, socks5Proxy } from './lib/toy-servers.mjs'
 
 const target = await origin()

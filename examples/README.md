@@ -14,14 +14,14 @@ npm run examples          # all of them, which CI does too
 
 They are meant to be read in order, but each stands alone.
 
-| Example                                                    | What it shows                                   | Packages                                      |
-| ---------------------------------------------------------- | ----------------------------------------------- | --------------------------------------------- |
-| [`01-from-env.mjs`](01-from-env.mjs)                       | Routing a program the way the environment asked | `bare-proxy-from-env`, `bare-any-proxy-agent` |
-| [`02-connect-tunnel.mjs`](02-connect-tunnel.mjs)           | `CONNECT`, credentials, and what each hop sees  | `bare-https-proxy-agent`                      |
-| [`03-socks5.mjs`](03-socks5.mjs)                           | SOCKS5, and the DNS query that never leaves     | `bare-socks-proxy-agent`                      |
-| [`04-custom-protocol.mjs`](04-custom-protocol.mjs)         | Teaching the base a proxy protocol of your own  | `bare-proxy-agent`                            |
-| [`05-websocket.mjs`](05-websocket.mjs)                     | A websocket through a tunnel                    | `bare-ws`, `bare-https-proxy-agent`           |
-| [`06-diagnosing-failures.mjs`](06-diagnosing-failures.mjs) | Getting the reason out of what you caught       | `proxyErrorIn`                                |
+| Example                                                    | What it shows                                   | Packages                                        |
+| ---------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------- |
+| [`01-from-env.mjs`](01-from-env.mjs)                       | Routing a program the way the environment asked | `barex-proxy-from-env`, `barex-any-proxy-agent` |
+| [`02-connect-tunnel.mjs`](02-connect-tunnel.mjs)           | `CONNECT`, credentials, and what each hop sees  | `barex-https-proxy-agent`                       |
+| [`03-socks5.mjs`](03-socks5.mjs)                           | SOCKS5, and the DNS query that never leaves     | `barex-socks-proxy-agent`                       |
+| [`04-custom-protocol.mjs`](04-custom-protocol.mjs)         | Teaching the base a proxy protocol of your own  | `barex-proxy-agent`                             |
+| [`05-websocket.mjs`](05-websocket.mjs)                     | A websocket through a tunnel                    | `bare-ws`, `barex-https-proxy-agent`            |
+| [`06-diagnosing-failures.mjs`](06-diagnosing-failures.mjs) | Getting the reason out of what you caught       | `proxyErrorIn`                                  |
 
 ## What each one is actually about
 
@@ -41,7 +41,7 @@ handed a _name_, which the proxy resolves — so no DNS query for the target lea
 machine. Shows that both `socks5:` and `socks5h:` do this here, that an address is still
 sent as an address, and why a port-less proxy url is refused rather than defaulted.
 
-**04 — a protocol of your own.** `bare-proxy-agent` is the half that does not depend on
+**04 — a protocol of your own.** `barex-proxy-agent` is the half that does not depend on
 which proxy protocol you speak, so a new one is a function: write, read a line, resolve or
 throw. Implements a made-up protocol end to end, points `fetch` at it, and then uses a
 `ProxySocket` directly to carry something that is not http at all.

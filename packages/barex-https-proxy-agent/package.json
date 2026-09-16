@@ -1,0 +1,61 @@
+{
+  "name": "barex-https-proxy-agent",
+  "version": "0.1.0",
+  "description": "HTTP CONNECT proxy agents for Bare, for bare-fetch and bare-ws",
+  "main": "index.mjs",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
+    "./package": "./package.json"
+  },
+  "files": [
+    "index.mjs",
+    "index.d.ts",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "brittle-bare test/index.mjs"
+  },
+  "dependencies": {
+    "barex-proxy-agent": "^0.1.0"
+  },
+  "devDependencies": {
+    "bare-fetch": "^3.2.0",
+    "bare-http1": "^4.6.0",
+    "bare-tcp": "^2.5.0",
+    "bare-url": "^2.5.4",
+    "brittle": "^3.19.0"
+  },
+  "peerDependencies": {
+    "bare-url": "*"
+  },
+  "peerDependenciesMeta": {
+    "bare-url": {
+      "optional": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mnaamani/bare-proxy-packages.git",
+    "directory": "packages/barex-https-proxy-agent"
+  },
+  "author": "Mokhtar Naamani",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/mnaamani/bare-proxy-packages/issues"
+  },
+  "keywords": [
+    "bare",
+    "proxy",
+    "agent",
+    "http",
+    "https",
+    "connect",
+    "tunnel"
+  ]
+}

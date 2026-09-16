@@ -2,8 +2,8 @@
 //
 //   bare examples/01-from-env.mjs
 //
-// This is the pairing most programs want: `bare-proxy-from-env` reads the convention the
-// unix world agreed on, and `bare-any-proxy-agent` turns whatever it found into the agents
+// This is the pairing most programs want: `barex-proxy-from-env` reads the convention the
+// unix world agreed on, and `barex-any-proxy-agent` turns whatever it found into the agents
 // `bare-fetch` and `bare-ws` take. Neither knows about the other; the url in the middle is
 // the whole interface.
 //
@@ -11,8 +11,8 @@
 // it is started, and so that `no_proxy` has something to carve a hole in.
 import 'bare-fetch/global'
 import process from 'bare-process'
-import { bypassed, getProxyForUrl, noProxy, proxyForProtocol } from 'bare-proxy-from-env'
-import { createAgents, parse } from 'bare-any-proxy-agent'
+import { bypassed, getProxyForUrl, noProxy, proxyForProtocol } from 'barex-proxy-from-env'
+import { createAgents, parse } from 'barex-any-proxy-agent'
 import { forwardProxy, hosts, origin } from './lib/toy-servers.mjs'
 
 const target = await origin('hello through the proxy')

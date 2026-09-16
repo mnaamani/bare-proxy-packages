@@ -1,9 +1,9 @@
-// Teaching `bare-proxy-agent` a proxy protocol of your own.
+// Teaching `barex-proxy-agent` a proxy protocol of your own.
 //
 //   bare examples/04-custom-protocol.mjs
 //
 // SOCKS5 and `CONNECT` are two answers to one question — how do I ask this proxy to put me
-// through to somewhere else — and `bare-proxy-agent` is the part that does not depend on
+// through to somewhere else — and `barex-proxy-agent` is the part that does not depend on
 // the answer: a socket that is opened by handshake rather than by connecting, the agents
 // built on it, and the reading and error types a handshake is written against.
 //
@@ -20,7 +20,7 @@ import {
   parseProxyUrl,
   proxyErrorIn,
   proxyName
-} from 'bare-proxy-agent'
+} from 'barex-proxy-agent'
 import { hosts, origin } from './lib/toy-servers.mjs'
 
 // ── the protocol ─────────────────────────────────────────────────────────────────────────
