@@ -5,14 +5,53 @@ drop-in port of it. That is not a matter of unfinished work: the shape of a prox
 decided by the http client it plugs into, and `bare-http1` is a different client from Node's
 `http` in ways that reach the public surface. This is the list, and what each one forces.
 
-Written against `bare-http1` 4.6.2. Where a claim is about behaviour rather than about an
-API's spelling, it was checked against that version rather than taken from documentation.
+Written against `bare-http1` 4.6.2, `bare-https` 3.1.0 and Bare 1.33.0. Where a claim is
+about behaviour rather than about an API's spelling, it was checked against those versions
+rather than taken from documentation.
 
-## 1. There are no builtins, so there is nothing to subclass
+## 1. Networking is npm packages, so there is nothing to subclass
 
-Bare has no `http`, `https`, `net` or `tls` modules. There is
+Bare ships no `http`, `https`, `net` or `tls` module. Under `bare` 1.33.0 all eight of
+`http`, `https`, `net`, `tls` and their `node:`-prefixed spellings fail to resolve with
+`MODULE_NOT_FOUND`. What there is instead is
 [`bare-http1`](https://github.com/holepunchto/bare-http1), `bare-https`, `bare-net`,
-`bare-tcp` and `bare-tls`, each an ordinary npm package with an API of its own.
+`bare-tcp` and `bare-tls`: ordinary npm packages, resolved out of `node_modules` like any
+other dependency, each with an API of its own.
+
+Two things that _are_ called builtins in Bare are worth separating out, because neither one
+puts these modules back.
+
+**Static addons.** Bare links a fixed set of native addons into the binary — its
+`src/builtins.json` lists `bare-buffer`, `bare-hrtime`, `bare-inspect`, `bare-logger`,
+`bare-module`, `bare-module-lexer`, `bare-path`, `bare-structured-clone`,
+`bare-system-logger`, `bare-timers`, `bare-type`, `bare-type-stripper` and `bare-url`. An
+addon is the native half of a package, not a module name: `require('bare-url')` still
+resolves the npm package, which then finds its binding already linked in rather than loading
+a `.bare` file. Nothing in that list is networking, and nothing in it is spelled as a Node
+module name.
+
+**Host-injected builtins.** Bare's module system does take a name-to-exports map:
+`Module.load(url, source, { builtins })` registers it, and `bare-module-resolve` consults
+`builtinTarget()` _before_ it walks `node_modules`, so a builtin shadows a package of the
+same name. An embedder is therefore free to register `net`, `tls`, `http` or `https` as
+builtins, and code running inside it will `require('net')` successfully. That mechanism is
+real and was verified, but it is a host's choice, not the runtime's: neither the `bare` CLI
+nor Pear registers any of these names, and there is no published shim that does (there is no
+`bare-node` package on npm). Nothing here can assume those names exist.
+
+The `/global` subpath some Bare packages carry is a third thing again, and not this one.
+`bare-buffer/global`, `bare-url/global`, `bare-process/global`, `bare-fetch/global` and
+`bare-ws/global` assign global _variables_ — `Buffer`, `URL`, `process`, `fetch`,
+`WebSocket` — because those are ambient globals in Node and the browser. `net` and `http`
+never were: they are module names, so there is nothing for such a shim to install, and none
+of `bare-net`, `bare-tcp`, `bare-tls`, `bare-http1` or `bare-https` exports a `/global` at
+all.
+
+The nuance does not rescue the Node stack even where a host does inject them, because a
+builtin is only a name. Whatever a host puts behind `net` or `http` in a Bare process is
+going to be `bare-net` or `bare-http1`, with the surface described in the rest of this
+document — not Node's `http.Agent` and its internals. So read every claim below as being
+about the API a name reaches, never about whether the name resolves.
 
 The immediate consequence is that [`agent-base`](https://www.npmjs.com/package/agent-base) —
 the package every Node proxy agent is built on — cannot be used or ported cheaply. It
