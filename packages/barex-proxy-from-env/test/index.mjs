@@ -57,10 +57,23 @@ test('ALL_PROXY covers a scheme with no proxy of its own', (t) => {
 })
 
 test('a variable set to nothing is not set', (t) => {
-  t.teardown(withEnv({ https_proxy: '', HTTPS_PROXY: 'http://upper.lan:2' }))
-  t.is(proxyForProtocol('https:').url, 'http://upper.lan:2', 'the empty one does not win the ??')
+  t.teardown(withEnv({ https_proxy: '' }))
   t.is(fromEnv('https_proxy'), null)
+  t.is(proxyForProtocol('https:'), null, 'and nothing below it is set either')
 })
+
+// The same property, but read off the two spellings at once, which is the part Windows
+// cannot hold up: an empty `https_proxy` and a set `HTTPS_PROXY` are one variable there,
+// and what it holds is the value.
+test(
+  'an empty spelling does not win against one that is set',
+  { skip: WINDOWS && 'one variable on Windows, so there is no both' },
+  (t) => {
+    t.teardown(withEnv({ https_proxy: '', HTTPS_PROXY: 'http://upper.lan:2' }))
+    t.is(proxyForProtocol('https:').url, 'http://upper.lan:2', 'the empty one does not win the ??')
+    t.is(fromEnv('https_proxy'), null)
+  }
+)
 
 test('websockets are read as the scheme they are an upgrade of', (t) => {
   t.teardown(withEnv({ https_proxy: 'http://secure.lan:1', http_proxy: 'http://plain.lan:2' }))
