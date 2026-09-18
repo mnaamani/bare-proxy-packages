@@ -11,21 +11,40 @@ import {
   proxyForProtocol
 } from '../index.mjs'
 
+// Windows environment variables are case-insensitive, so `http_proxy` and `HTTP_PROXY` are
+// not two variables there to have a rule between: whichever spelling was written last is
+// the only value there is. The two tests below are about telling the spellings apart, which
+// is the one thing that platform cannot do.
+const WINDOWS = process.platform === 'win32'
+
 test('a scheme is read from its own variable, in either case', (t) => {
   t.teardown(withEnv({ https_proxy: 'http://secure.lan:3128' }))
   t.alike(proxyForProtocol('https:'), { url: 'http://secure.lan:3128', source: 'https_proxy' })
   t.is(proxyForProtocol('http:'), null, "and not from another scheme's")
 })
 
-test('the lower case spelling wins where both are set', (t) => {
-  t.teardown(withEnv({ https_proxy: 'http://lower.lan:1', HTTPS_PROXY: 'http://upper.lan:2' }))
-  t.is(proxyForProtocol('https:').url, 'http://lower.lan:1')
-})
+test(
+  'the lower case spelling wins where both are set',
+  { skip: WINDOWS && 'one variable on Windows, so there is no both' },
+  (t) => {
+    t.teardown(withEnv({ https_proxy: 'http://lower.lan:1', HTTPS_PROXY: 'http://upper.lan:2' }))
+    t.is(proxyForProtocol('https:').url, 'http://lower.lan:1')
+  }
+)
 
 // Under CGI a request header `Proxy: ...` arrives as HTTP_PROXY, so honouring the upper case
 // spelling would let whoever sent the request choose the proxy.
 test('http_proxy is read in lower case only', (t) => {
   t.teardown(withEnv({ HTTP_PROXY: 'http://attacker.example:3128' }))
+
+  // Pinned rather than skipped on Windows: the guard cannot hold there, and a test that
+  // says so is worth more than one that quietly does not run. curl documents the same
+  // hole in the same terms - the mitigation is by spelling, and Windows has one spelling.
+  if (WINDOWS) {
+    t.is(proxyForProtocol('http:').url, 'http://attacker.example:3128')
+    return
+  }
+
   t.is(proxyForProtocol('http:'), null)
   t.is(getProxyForUrl('http://origin.example'), '')
 })

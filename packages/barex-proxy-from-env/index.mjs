@@ -14,6 +14,13 @@
 // such collision. Node's proxy-from-env reads both spellings of every variable, including
 // that one; this does not, and that is the one difference worth knowing before porting code
 // across.
+//
+// That exception buys nothing on Windows, where the environment is case-insensitive:
+// `http_proxy` and `HTTP_PROXY` are one variable, and reading the lower case spelling reads
+// whatever was put in the upper case one. curl documents the same hole - the mitigation is
+// by spelling, and Windows has only the one. Closing it takes something other than a name:
+// Ruby and libwww-perl look for a CGI context and read `CGI_HTTP_PROXY` instead, which is
+// what httpoxy.org recommends for anyone who needs the guard to hold there.
 import process from 'bare-process'
 
 // The variables consulted for each target scheme, in the order they win. ws: and wss: are

@@ -41,6 +41,16 @@ header `Proxy: ...` arrives in the environment as `HTTP_PROXY`, so honouring the
 spelling would let whoever sent the request choose the proxy (CVE-2016-5385 and friends).
 The other variables have no such collision.
 
+**On Windows that exception buys nothing.** Environment variables are case-insensitive
+there, so `http_proxy` and `HTTP_PROXY` are one variable and reading the lower case spelling
+reads whatever was put in the upper case one. curl documents the same hole - the mitigation
+is by spelling, and Windows has only the one. Node is in the same position, and does not
+try: its `process.env` is case-insensitive on Windows too, and `proxy-from-env`, undici's
+`EnvHttpProxyAgent` and Node's own built-in proxy support all read `HTTP_PROXY` deliberately
+on every platform. Where the guard does have to hold, the way to get it is not a spelling:
+Ruby and libwww-perl look for a CGI context and read `CGI_HTTP_PROXY` instead, which is what
+[httpoxy.org](https://httpoxy.org) recommends.
+
 A variable set to the empty string is not set: exporting an empty `http_proxy` is how the
 convention says "no proxy here", usually to undo one the login shell exported.
 
@@ -91,7 +101,7 @@ deliberate differences:
 
 |                         | Node                                   | here                                                                                                             |
 | ----------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `HTTP_PROXY`            | read, upper case as well as lower      | lower case only - see above                                                                                      |
+| `HTTP_PROXY`            | read, upper case as well as lower      | lower case only - see above, and not on Windows, where the two spellings are one variable                        |
 | `npm_config_*_proxy`    | read, and outranks the plain variables | not read: npm's own config, injected by `npm run`, and a program's traffic should not turn on how it was started |
 | scheme-less proxy value | given the **target's** scheme          | given `http://`, as curl does                                                                                    |
 | a port in `no_proxy`    | matched against the target's port      | ignored - it is the host being exempted, which is curl's reading                                                 |
