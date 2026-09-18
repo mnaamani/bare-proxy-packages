@@ -1,0 +1,78 @@
+# Publishing one package, from a tag that names it.
+#
+# The packages version independently, so a tag carries both halves of what is being
+# released: `barex-socks-proxy-agent@0.2.0` publishes that package at that version and
+# touches nothing else. The version in the tag has to match the one in the manifest -
+# nothing derives one from the other, so the preflight compares them and refuses a tag
+# somebody typed wrong.
+#
+# Authentication is npm's trusted publishing: the job proves it is this workflow in this
+# repository over OIDC and npm mints a short-lived token for it, so there is no secret in
+# the repository to leak or rotate, and the published package carries provenance linking
+# it back to the commit it was built from. Each package has to be configured for it once,
+# on npmjs.com, under Settings -> Trusted publishers.
+#
+#   git tag barex-proxy-agent@0.1.0 && git push origin barex-proxy-agent@0.1.0
+name: Release
+
+on:
+  push:
+    tags: ['*@*']
+
+jobs:
+  publish:
+    name: ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    permissions:
+      # The OIDC token is what npm trades for a publish token. Without it the publish step
+      # falls back to looking for a credential that is not there.
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing landed in npm 11.5.1, and the runner's bundled npm is older
+      # than that for a while yet.
+      - name: Update npm
+        run: npm i -g npm@latest
+
+      - name: Install Bare
+        run: npm i -g bare-runtime
+
+      - name: Install w/ dev deps
+        run: npm install
+
+      # A tag is `<package-name>@<version>`, and the name is everything before the last @
+      # so that a scoped name would survive the split.
+      - name: Read the tag
+        id: tag
+        run: |
+          tag='${{ github.ref_name }}'
+          echo "name=${tag%@*}" >> "$GITHUB_OUTPUT"
+          echo "version=${tag##*@}" >> "$GITHUB_OUTPUT"
+
+      # Everything that can be known before uploading: the tag agrees with the manifest,
+      # the version is not already spent, and the packages this one depends on are on the
+      # registry at ranges that resolve.
+      - name: Preflight
+        run: node scripts/check-publishable.mjs '${{ steps.tag.outputs.name }}' '${{ steps.tag.outputs.version }}'
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Pack and install as a consumer would
+        run: npm run check-packaging
+
+      - name: Publish
+        run: npm publish --workspace 'packages/${{ steps.tag.outputs.name }}'

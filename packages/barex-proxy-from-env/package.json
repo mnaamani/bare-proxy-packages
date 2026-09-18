@@ -41,6 +41,7 @@
     "url": "git+https://github.com/mnaamani/bare-proxy-packages.git",
     "directory": "packages/barex-proxy-from-env"
   },
+  "homepage": "https://github.com/mnaamani/bare-proxy-packages/tree/main/packages/barex-proxy-from-env#readme",
   "author": "Mokhtar Naamani",
   "license": "Apache-2.0",
   "bugs": {

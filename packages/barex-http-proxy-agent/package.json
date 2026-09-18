@@ -44,6 +44,7 @@
     "url": "git+https://github.com/mnaamani/bare-proxy-packages.git",
     "directory": "packages/barex-http-proxy-agent"
   },
+  "homepage": "https://github.com/mnaamani/bare-proxy-packages/tree/main/packages/barex-http-proxy-agent#readme",
   "author": "Mokhtar Naamani",
   "license": "Apache-2.0",
   "bugs": {

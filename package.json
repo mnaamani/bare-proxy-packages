@@ -10,6 +10,7 @@
     "test": "npm test --workspaces",
     "examples": "node scripts/run-examples.mjs",
     "types": "tsc --noEmit && node scripts/check-typings.mjs",
+    "check-packaging": "node scripts/check-packaging.mjs",
     "lint": "prettier . --check && node scripts/check-ascii.mjs && lunte && npm run types",
     "format": "prettier . --write"
   },

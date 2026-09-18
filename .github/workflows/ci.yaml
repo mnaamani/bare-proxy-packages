@@ -58,3 +58,37 @@ jobs:
       # faster than anything else in a repository, because nothing is watching them.
       - name: Examples
         run: npm run examples
+
+  # The test job runs against the workspace, where the six packages are symlinked into each
+  # other and every devDependency is hoisted within reach. This job is the other half: the
+  # tarballs npm would upload, installed somewhere that is not the workspace. It runs on
+  # every platform the tests do, because `files` is matched case-insensitively on one of
+  # them and not on the others, and that difference only ever shows up in a tarball.
+  pack:
+    name: pack ${{ matrix.host }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            host: linux-x64
+          - os: ubuntu-24.04-arm
+            host: linux-arm64
+          - os: macos-latest
+            host: darwin-arm64
+          - os: windows-latest
+            host: win32-x64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - name: Setup repo
+        uses: holepunchto/actions/.github/steps/setup-repo@v1
+
+      - name: Install w/ dev deps
+        run: npm install
+
+      - name: Install Bare
+        run: npm i -g bare-runtime
+
+      - name: Pack and install as a consumer would
+        run: npm run check-packaging
