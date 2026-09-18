@@ -1,5 +1,5 @@
 // The base on its own: url reading, and a ProxySocket driven by a handshake of the test's
-// own invention. Nothing here speaks SOCKS5 or CONNECT — those are the two packages that
+// own invention. Nothing here speaks SOCKS5 or CONNECT - those are the two packages that
 // depend on this one, and each tests its own protocol.
 import 'bare-fetch/global'
 import test from 'brittle'
@@ -121,7 +121,7 @@ test('a request goes out over whatever the handshake opened', async (t) => {
 
 // Every http-target agent writes the request to whatever the handshake opened, with nothing
 // negotiated on top, so port 443 means an https: target has reached the agent built for
-// http: — which is what bare-fetch does when it follows a redirect that changes scheme,
+// http: - which is what bare-fetch does when it follows a redirect that changes scheme,
 // since it keeps the agent it was handed and an agent under bare-http1 *is* the scheme.
 test('the http agent refuses to carry a plain request to port 443', async (t) => {
   const proxy = await demoProxy(t)
@@ -149,7 +149,7 @@ test(
     const proxy = await demoProxy(t)
     const agents = agentsFor(t, proxy.port)
 
-    // No TLS server behind the demo proxy, so this fails — but at the handshake having been
+    // No TLS server behind the demo proxy, so this fails - but at the handshake having been
     // spoken, which is the half being asserted.
     await fetch(`https://secret.example:${targetPort}/vault`, { agent: agents.https }).catch(
       () => {}

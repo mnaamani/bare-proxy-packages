@@ -8,7 +8,7 @@
 // A missing port is refused for the same reason rather than defaulted, which is the one
 // place this departs from every proxy agent in the Node ecosystem. There is no default worth
 // having: http-proxy-agent reads a port-less proxy url as port 80, curl reads it as 1080, and
-// 8080 is where proxies actually tend to listen — three answers, so any of them is a guess.
+// 8080 is where proxies actually tend to listen - three answers, so any of them is a guess.
 // A guess that lands on the wrong service still hands it the Proxy-Authorization header, or
 // the SOCKS5 handshake with the username and password in it, before anything notices. The
 // port is one word and only the person configuring it knows which.
@@ -23,7 +23,7 @@ export function parseProxyUrl(value, schemes) {
   }
   if (!schemes.includes(url.protocol)) {
     const named = schemes.map((scheme) => `${scheme}//`).join(', ')
-    throw new Error(`unsupported proxy scheme — use ${named}`)
+    throw new Error(`unsupported proxy scheme - use ${named}`)
   }
   const name = `${url.protocol}//${url.host}`
   if (!url.hostname) throw new Error(`the proxy url names no host: ${name}`)
@@ -32,7 +32,7 @@ export function parseProxyUrl(value, schemes) {
   }
   const port = writtenPort(raw, url)
   if (port === null) {
-    throw new Error(`the proxy url names no port: ${name} — write the one you mean`)
+    throw new Error(`the proxy url names no port: ${name} - write the one you mean`)
   }
 
   let username, password
@@ -50,7 +50,7 @@ export function parseProxyUrl(value, schemes) {
     username,
     password,
     // Whether the first hop is itself TLS, which is the base's business rather than any one
-    // handshake's. Set by whoever parsed the url — an https:// proxy is one.
+    // handshake's. Set by whoever parsed the url - an https:// proxy is one.
     secure: false
   }
 }
@@ -66,7 +66,7 @@ function writtenPort(raw, url) {
   const at = raw.indexOf('://')
   if (at === -1) return null
   const authority = raw.slice(at + 3).split(/[/?#]/, 1)[0]
-  // Anything before an @ is the credentials, and an IPv6 host keeps its brackets — which is
+  // Anything before an @ is the credentials, and an IPv6 host keeps its brackets - which is
   // what stops the colons inside one from reading as a port.
   const host = authority.slice(authority.lastIndexOf('@') + 1)
   const written = /:(\d+)$/.exec(host)

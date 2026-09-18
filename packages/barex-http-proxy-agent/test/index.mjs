@@ -21,7 +21,7 @@ test('an http proxy url is read, and an https one says the first hop is TLS', (t
   t.exception.all(
     () => parse('http://proxy.example'),
     /names no port/,
-    'a port is written down, never guessed at — 80, 443, 1080 and 8080 all have a claim'
+    'a port is written down, never guessed at - 80, 443, 1080 and 8080 all have a claim'
   )
   t.exception.all(() => parse('socks5://127.0.0.1:1080'), /unsupported proxy scheme/)
 })
@@ -90,7 +90,7 @@ test('a target on a port of its own keeps it in the forwarded url', async (t) =>
 })
 
 // `new URL(path, origin)` reads a path that begins with // as an authority, so resolving the
-// path against the origin — which is what http-proxy-agent does — forwards
+// path against the origin - which is what http-proxy-agent does - forwards
 // http://origin.example//v1/info as a request to a host called `v1`.
 test('a path that begins with // is a path, not another host', async (t) => {
   const origin = await server(t)
@@ -101,7 +101,7 @@ test('a path that begins with // is a path, not another host', async (t) => {
   t.is(proxy.lines[0], `GET http://127.0.0.1:${origin.port}//v1/info HTTP/1.1`)
 })
 
-// A path may contain a url without being one — half of lnurl looks like this. Testing the
+// A path may contain a url without being one - half of lnurl looks like this. Testing the
 // path for `://` to decide whether it has been rewritten already answers yes for these, and
 // the request then goes out in origin-form with no Proxy-Authorization on it.
 test('a path that merely contains a url is still rewritten', async (t) => {
@@ -155,7 +155,7 @@ test('a proxy that is not listening fails the request', async (t) => {
     (err) => err
   )
   t.ok(err, 'the request failed rather than hanging')
-  t.is(proxyErrorIn(err), null, 'and not as a handshake error — there is no handshake')
+  t.is(proxyErrorIn(err), null, 'and not as a handshake error - there is no handshake')
 })
 
 function agentFor(t, port, credentials = '') {

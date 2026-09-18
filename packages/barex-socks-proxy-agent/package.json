@@ -1,7 +1,7 @@
 {
   "name": "barex-socks-proxy-agent",
   "version": "0.1.0",
-  "description": "SOCKS5 proxy agents for Bare, for bare-fetch and bare-ws \u2014 with the target name resolved by the proxy (socks5h)",
+  "description": "SOCKS5 proxy agents for Bare, for bare-fetch and bare-ws - with the target name resolved by the proxy (socks5h)",
   "main": "index.mjs",
   "types": "./index.d.ts",
   "exports": {

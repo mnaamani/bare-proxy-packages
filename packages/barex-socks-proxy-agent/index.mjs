@@ -2,7 +2,7 @@
 //
 // Names are never resolved here: the target goes over the wire as written and the proxy
 // resolves it, so no DNS query for it leaves the machine. That is what socks5h:// means
-// elsewhere, and it is what both schemes do here — `socks5://` and `socks5h://` are the
+// elsewhere, and it is what both schemes do here - `socks5://` and `socks5h://` are the
 // same proxy to this package, and the spelling is kept only so errors quote back what was configured.
 //
 // The socket, the agents and the error type are barex-proxy-agent's; this is the handshake.
@@ -21,10 +21,10 @@ import {
 
 // The schemes a proxy url may be written with here. No default port goes with them: a
 // port-less proxy url is refused rather than read as 1080, which is what socks-proxy-agent
-// and curl both read it as — see parseProxyUrl.
+// and curl both read it as - see parseProxyUrl.
 export const SCHEMES = ['socks5:', 'socks5h:']
 
-// Reply codes worth naming (RFC 1928 §6). The rest are reported by number.
+// Reply codes worth naming (RFC 1928 section 6). The rest are reported by number.
 const REPLIES = {
   1: 'the proxy failed',
   2: 'the proxy is not allowed to',
@@ -58,7 +58,7 @@ export async function handshake({ socket, reader, proxy, target }) {
     throw new ProxyError(
       credentials
         ? `${name} accepts neither of the ways we can authenticate`
-        : `${name} wants authentication — put a username and password in the proxy url`
+        : `${name} wants authentication - put a username and password in the proxy url`
     )
   }
   if (method === 2) {
@@ -100,7 +100,7 @@ export async function handshake({ socket, reader, proxy, target }) {
 }
 
 // An address as SOCKS5 writes it. A dotted-quad goes as an IPv4 address, everything else as
-// a name for the proxy to resolve — which keeps our DNS off the network, and is the right
+// a name for the proxy to resolve - which keeps our DNS off the network, and is the right
 // form for the hostnames a client actually asks for. An IPv6 literal is rare enough as a
 // target that it is handed over as a name too, and left to the proxy to make sense of.
 function address(host) {
@@ -130,7 +130,7 @@ function isURL(value) {
 }
 
 // The schemes these agents speak, as socks-proxy-agent lists them. Not socks4, socks4a or
-// bare `socks:` — this package speaks SOCKS5 and nothing else, and a url it cannot honour is
+// bare `socks:` - this package speaks SOCKS5 and nothing else, and a url it cannot honour is
 // better refused than quietly downgraded.
 const PROTOCOLS = ['socks5', 'socks5h']
 

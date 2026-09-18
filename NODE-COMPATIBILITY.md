@@ -21,7 +21,7 @@ other dependency, each with an API of its own.
 Two things that _are_ called builtins in Bare are worth separating out, because neither one
 puts these modules back.
 
-**Static addons.** Bare links a fixed set of native addons into the binary — its
+**Static addons.** Bare links a fixed set of native addons into the binary - its
 `src/builtins.json` lists `bare-buffer`, `bare-hrtime`, `bare-inspect`, `bare-logger`,
 `bare-module`, `bare-module-lexer`, `bare-path`, `bare-structured-clone`,
 `bare-system-logger`, `bare-timers`, `bare-type`, `bare-type-stripper` and `bare-url`. An
@@ -41,8 +41,8 @@ nor Pear registers any of these names, and there is no published shim that does 
 
 The `/global` subpath some Bare packages carry is a third thing again, and not this one.
 `bare-buffer/global`, `bare-url/global`, `bare-process/global`, `bare-fetch/global` and
-`bare-ws/global` assign global _variables_ — `Buffer`, `URL`, `process`, `fetch`,
-`WebSocket` — because those are ambient globals in Node and the browser. `net` and `http`
+`bare-ws/global` assign global _variables_ - `Buffer`, `URL`, `process`, `fetch`,
+`WebSocket` - because those are ambient globals in Node and the browser. `net` and `http`
 never were: they are module names, so there is nothing for such a shim to install, and none
 of `bare-net`, `bare-tcp`, `bare-tls`, `bare-http1` or `bare-https` exports a `/global` at
 all.
@@ -50,11 +50,11 @@ all.
 The nuance does not rescue the Node stack even where a host does inject them, because a
 builtin is only a name. Whatever a host puts behind `net` or `http` in a Bare process is
 going to be `bare-net` or `bare-http1`, with the surface described in the rest of this
-document — not Node's `http.Agent` and its internals. So read every claim below as being
+document - not Node's `http.Agent` and its internals. So read every claim below as being
 about the API a name reaches, never about whether the name resolves.
 
-The immediate consequence is that [`agent-base`](https://www.npmjs.com/package/agent-base) —
-the package every Node proxy agent is built on — cannot be used or ported cheaply. It
+The immediate consequence is that [`agent-base`](https://www.npmjs.com/package/agent-base) -
+the package every Node proxy agent is built on - cannot be used or ported cheaply. It
 subclasses `http.Agent` and reaches into its internals to do it. So
 [`barex-proxy-agent`](packages/barex-proxy-agent) exists: it is the `agent-base` layer of the
 Node stack, rewritten against `bare-http1`'s agent instead. That is why this workspace has
@@ -79,7 +79,7 @@ Three differences follow from the signature alone:
 - **No request.** The agent is handed connection options, not the `ClientRequest`, so it
   cannot decide anything per request that is not already in `opts`.
 - **Synchronous.** It must return a socket now. A handshake that has to finish before the
-  socket is usable cannot be awaited here — hence
+  socket is usable cannot be awaited here - hence
   [`ProxySocket`](packages/barex-proxy-agent/lib/socket.mjs), a socket that is returned
   immediately and connects by running a handshake, rather than one you get after connecting.
 - **No delegation.** Node lets `connect()` return another agent, which is how
@@ -106,10 +106,10 @@ redirect; applications needing that policy must perform that selection themselve
 
 ## 4. TLS is the agent's job, and the wrapper is not exported
 
-Because of §3, an https-capable proxy agent has to run TLS itself, over the socket the
-handshake produced. `bare-https` does exactly this, but its TLS socket wrapper — the one that
+Because of section 3, an https-capable proxy agent has to run TLS itself, over the socket the
+handshake produced. `bare-https` does exactly this, but its TLS socket wrapper - the one that
 forwards `setKeepAlive`, `setNoDelay`, `setTimeout`, `ref` and `unref` down to the socket
-underneath, which an http agent calls and a bare `tls.Socket` does not forward — is internal.
+underneath, which an http agent calls and a bare `tls.Socket` does not forward - is internal.
 `bare-https` exports `Agent`, `globalAgent`, `Server`, `ClientRequest`, `createServer`,
 `request` and `get`, and nothing else.
 
@@ -133,7 +133,7 @@ addRequest(req, opts) {
   opts = { ...opts, ...this._opts }
 ```
 
-Node's `http.Agent` merges the same way round, so that part is shared — but here the merged
+Node's `http.Agent` merges the same way round, so that part is shared - but here the merged
 result is what reaches `createConnection`, and `timeout` in it is the _socket_ timeout applied
 to every connection the agent makes. A proxy agent needs a second, different deadline for the
 handshake, and cannot spell it `timeout` the way `socks-proxy-agent` and `https-proxy-agent`
@@ -150,7 +150,7 @@ mistake would silently redirect every request that agent ever carries.
   streams. The spellings differ where it matters in an agent: `socket.destroying`, not
   `destroyed`.
 - Failures are `HTTPError` instances with `err.name === 'HTTPError'` and codes of
-  `bare-http1`'s own — `CONNECTION_LOST`, `HEADERS_SENT`, `CONTENT_LENGTH_MISMATCH`,
+  `bare-http1`'s own - `CONNECTION_LOST`, `HEADERS_SENT`, `CONTENT_LENGTH_MISMATCH`,
   `AGENT_SUSPENDED`, `INVALID_PROTOCOL`. Not `ECONNRESET`, not `ERR_*`. Code that branches on
   a Node error code will not match, and matching Node's error shapes is not something a
   package on top can retrofit.
@@ -160,9 +160,9 @@ mistake would silently redirect every request that agent ever carries.
 |                           | Node `http.Agent`            | `bare-http1` `Agent`                                    |
 | ------------------------- | ---------------------------- | ------------------------------------------------------- |
 | `sockets` / `freeSockets` | objects keyed by origin name | generators of sockets                                   |
-| suspend / resume          | —                            | `agent.suspend()`, `agent.resume()`, `agent.suspended`  |
-| idle teardown             | —                            | every agent destroys its sockets on Bare's `idle` event |
-| `connect(req, opts)`      | added by `agent-base`        | —                                                       |
+| suspend / resume          | -                            | `agent.suspend()`, `agent.resume()`, `agent.suspended`  |
+| idle teardown             | -                            | every agent destroys its sockets on Bare's `idle` event |
+| `connect(req, opts)`      | added by `agent-base`        | -                                                       |
 | `secureEndpoint`          | added by `agent-base`        | `opts.protocol` instead                                 |
 
 The idle teardown is worth knowing when porting: a keep-alive pool in Node holds the process
@@ -175,7 +175,7 @@ A proxy agent for `http:` targets has to rewrite the request line into absolute 
 (`GET http://origin.example/v1/info HTTP/1.1`). Neither client offers a public way to do it.
 Node's `http-proxy-agent` assigns `req.path` and calls `req.setHeader()` from `addRequest`.
 
-That works under `bare-http1` 4.6 too — `ClientRequest` assigns `_path` and `_headers`
+That works under `bare-http1` 4.6 too - `ClientRequest` assigns `_path` and `_headers`
 before it calls `agent.addRequest`, and an edit made there does reach the wire (checked, not
 assumed), which is why [`barex-http-proxy-agent`](packages/barex-http-proxy-agent) requires
 `^4.6.0` and does the rewrite in the same place Node does. What differs is only the
@@ -204,13 +204,13 @@ Worth saying, since the list above is long:
 
 ## Summary
 
-| Node                                             | Why it cannot be matched here                                 |
-| ------------------------------------------------ | ------------------------------------------------------------- |
-| One agent for `http:` and `https:` targets       | Paired agents delegate using `opts.protocol` (§3)             |
-| `connect(req, opts)`, async, may return an agent | Hook is a synchronous `createConnection(opts)` (§2)           |
-| `ProxyAgent` resolving a proxy per request       | Nothing per-request to resolve it in (§2, §3)                 |
-| PAC support via `pac-proxy-agent`                | Needs a script sandbox and resolver; also §2 (delegation)     |
-| Reuse of `agent-base`                            | Written against `http.Agent` internals that do not exist (§1) |
-| `opts.timeout` for the handshake                 | Taken by `bare-http1`'s socket timeout (§6)                   |
-| Node error codes                                 | `HTTPError` with its own codes (§7)                           |
-| SOCKS4 / SOCKS4a, `onProxyAuth`, NTLM/Kerberos   | Not implemented — scope, not a constraint                     |
+| Node                                             | Why it cannot be matched here                                        |
+| ------------------------------------------------ | -------------------------------------------------------------------- |
+| One agent for `http:` and `https:` targets       | Paired agents delegate using `opts.protocol` (section 3)             |
+| `connect(req, opts)`, async, may return an agent | Hook is a synchronous `createConnection(opts)` (section 2)           |
+| `ProxyAgent` resolving a proxy per request       | Nothing per-request to resolve it in (section 2, section 3)          |
+| PAC support via `pac-proxy-agent`                | Needs a script sandbox and resolver; also section 2 (delegation)     |
+| Reuse of `agent-base`                            | Written against `http.Agent` internals that do not exist (section 1) |
+| `opts.timeout` for the handshake                 | Taken by `bare-http1`'s socket timeout (section 6)                   |
+| Node error codes                                 | `HTTPError` with its own codes (section 7)                           |
+| SOCKS4 / SOCKS4a, `onProxyAuth`, NTLM/Kerberos   | Not implemented - scope, not a constraint                            |

@@ -1,7 +1,7 @@
 {
   "name": "barex-http-proxy-agent",
   "version": "0.1.0",
-  "description": "A forwarding http proxy agent for Bare, for bare-fetch and bare-ws \u2014 the absolute-form half of Node's http-proxy-agent",
+  "description": "A forwarding http proxy agent for Bare, for bare-fetch and bare-ws - the absolute-form half of Node's http-proxy-agent",
   "main": "index.mjs",
   "types": "./index.d.ts",
   "exports": {

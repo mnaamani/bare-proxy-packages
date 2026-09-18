@@ -48,7 +48,7 @@ test('an https proxy is the same, reached over TLS', (t) => {
 })
 
 // Every scheme here has a port some client somewhere treats as its default, and no two agree
-// — so none of them is guessed. The one word costs less than a Proxy-Authorization header
+// - so none of them is guessed. The one word costs less than a Proxy-Authorization header
 // handed to whatever was listening on the guess.
 test('a proxy url with no port is refused, whatever its scheme', (t) => {
   for (const url of ['http://proxy.lan', 'https://proxy.lan', 'socks5://127.0.0.1']) {

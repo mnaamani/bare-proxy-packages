@@ -40,7 +40,7 @@ export function fromEnv(...names: string[]): ProxySetting | null
 /**
  * The proxy for a target scheme, falling back to `ALL_PROXY`.
  *
- * `ws:` and `wss:` are read as `http:` and `https:` — nothing in the convention defines a
+ * `ws:` and `wss:` are read as `http:` and `https:` - nothing in the convention defines a
  * `ws_proxy`, and a program that proxies its http traffic means its websockets too.
  *
  * `no_proxy` is not consulted: that is a question about a host, and this one is only about
@@ -57,12 +57,12 @@ export function proxyForProtocol(protocol: string): ProxySetting | null
  * Node's `proxy-from-env`, name and shape included, and the same answer for the ordinary
  * cases. It differs deliberately in five: `HTTP_PROXY` in upper case is not read (under CGI
  * a request header `Proxy:` arrives in the environment as `HTTP_PROXY`, so honouring it
- * would let whoever sent the request choose the proxy — CVE-2016-5385); `npm_config_*_proxy`
+ * would let whoever sent the request choose the proxy - CVE-2016-5385); `npm_config_*_proxy`
  * is not read; a scheme-less value is given `http://` rather than the target's scheme, as
  * curl does; a port in `no_proxy` is ignored, since it is the host being exempted; and CIDR
  * entries in `no_proxy` are supported, as curl has since 7.86.
  *
- * @param url The target url, as a string or anything with `protocol` and `hostname` — a
+ * @param url The target url, as a string or anything with `protocol` and `hostname` - a
  *   `URL` will do.
  * @returns The proxy url, or `''` to go direct. Also `''` for a value that is not a url.
  */
@@ -84,7 +84,7 @@ export function noProxy(): NoProxy | null
  * itself or any domain under it (`local.com` covers `www.local.com` but not
  * `www.notlocal.com`), and an entry may be an address or a CIDR block instead of a name. A
  * leading `.` or `*.` is the same entry written differently. A port on an entry is ignored,
- * since it is the host that is being exempted — which is curl's reading, where Node's
+ * since it is the host that is being exempted - which is curl's reading, where Node's
  * `proxy-from-env` matches the port too.
  *
  * @param value The raw variable, which may be absent.
@@ -106,7 +106,7 @@ export function bypassed(bypass: NoProxy | null, hostname: string): boolean
  * Puts a scheme on a proxy value that carries none.
  *
  * The convention writes a value as `[protocol://]host[:port]`, so a bare `host:port` is a
- * proxy reached over http — which is what curl assumes for it too. Node's `proxy-from-env`
+ * proxy reached over http - which is what curl assumes for it too. Node's `proxy-from-env`
  * assumes the *target's* scheme instead, so a bare host in `https_proxy` becomes an
  * `https://` proxy there and an `http://` one here.
  *

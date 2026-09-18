@@ -9,10 +9,10 @@ on it, and the reading and error types a handshake is written against.
 **Start with one of these instead**, unless you are teaching this package a protocol of your
 own:
 
-- [`barex-any-proxy-agent`](../barex-any-proxy-agent) — any of the below, picked from the url
-- [`barex-socks-proxy-agent`](../barex-socks-proxy-agent) — SOCKS5
-- [`barex-http-proxy-agent`](../barex-http-proxy-agent) — an http proxy asked to forward
-- [`barex-https-proxy-agent`](../barex-https-proxy-agent) — HTTP CONNECT
+- [`barex-any-proxy-agent`](../barex-any-proxy-agent) - any of the below, picked from the url
+- [`barex-socks-proxy-agent`](../barex-socks-proxy-agent) - SOCKS5
+- [`barex-http-proxy-agent`](../barex-http-proxy-agent) - an http proxy asked to forward
+- [`barex-https-proxy-agent`](../barex-https-proxy-agent) - HTTP CONNECT
 
 ```
 npm i barex-proxy-agent
@@ -50,7 +50,7 @@ itself TLS (`secure: true`) is reached over TLS as well.
 
 #### `createAgents(tunnel[, opts])`
 
-`{ http, https }` — an agent for `http:` targets and one for `https:` ones. `tunnel` is
+`{ http, https }` - an agent for `http:` targets and one for `https:` ones. `tunnel` is
 `{ proxy, handshake, timeout }`; `opts` goes to `bare-http1`'s `Agent` (keep-alive is on by
 default). `ProxyHTTPAgent` and
 `ProxyHTTPSAgent` are exported for subclassing.
@@ -59,7 +59,7 @@ default). `ProxyHTTPAgent` and
 
 The connection itself, a `bare-stream` `Duplex`. Writes made before the handshake finishes
 are held and go out after, which is what lets a TLS socket be layered straight on top.
-`timeout` (default 30s) is how long the proxy has to answer its own handshake — a port that
+`timeout` (default 30s) is how long the proxy has to answer its own handshake - a port that
 is listening but is not a proxy says nothing at all.
 
 #### `handshake({ socket, reader, proxy, target })`
@@ -78,20 +78,20 @@ may be pending at a time.
 
 `{ protocol, host, port, username, password, secure }`, with `ports` giving the default port
 per scheme. `schemes` is the list this protocol answers to, spelled with the colon. Host and
-port only — a path or a query is refused rather than guessed at, and so is a missing port:
+port only - a path or a query is refused rather than guessed at, and so is a missing port:
 every scheme has a port some client treats as its default, no two agree, and a guess that
 lands on the wrong service is handed the credentials before anything notices. An
 IPv6 host comes back without its brackets; `authority({ host, port })` puts them back.
 
-#### `proxyName(proxy)` · `authority(target)` · `hasCredentials(proxy)`
+#### `proxyName(proxy)` / `authority(target)` / `hasCredentials(proxy)`
 
 Small shared helpers for writing a handshake's errors and requests.
 
-#### `ProxyError` · `proxyErrorIn(err)`
+#### `ProxyError` / `proxyErrorIn(err)`
 
 Everything that goes wrong on the way through a proxy, carrying `code: 'PROXY_ERROR'`.
 `bare-fetch` reports every failure as `NETWORK_ERROR: Network error` and keeps the reason as
-its cause, and a library above it may wrap that again — `proxyErrorIn` digs the reason back
+its cause, and a library above it may wrap that again - `proxyErrorIn` digs the reason back
 out, which is what the person whose proxy is not running needs to read.
 
 ## Compared to Node's proxy agents

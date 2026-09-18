@@ -8,7 +8,7 @@
 // nothing, and `instanceof ProxyError` is false.
 //
 // `proxyErrorIn` is the way back: it walks the `cause` chain and answers with the proxy
-// error, or null when the failure was not a proxy's. That distinction is the useful one —
+// error, or null when the failure was not a proxy's. That distinction is the useful one -
 // it is the difference between "your proxy is not running" and "that host is down", which
 // are fixed by different people.
 import 'bare-fetch/global'
@@ -38,7 +38,7 @@ function agents(pair) {
   return pair
 }
 
-// ── the shape of a failure ───────────────────────────────────────────────────────────────
+// -- the shape of a failure ---------------------------------------------------------------
 
 const pair = agents(socksAgents(`socks5://127.0.0.1:${closedPort}`))
 const thrown = await fetch('http://origin.example/', { agent: pair.http }).then(
@@ -65,7 +65,7 @@ console.log('buried two levels down:', proxyErrorIn(buried)?.code)
 console.log('an ordinary failure:    ', proxyErrorIn(new Error('disk full')))
 console.log()
 
-// ── the failures worth telling apart ─────────────────────────────────────────────────────
+// -- the failures worth telling apart -----------------------------------------------------
 
 const plaintext = new HttpsProxyHTTPAgent(`http://127.0.0.1:${http.port}`)
 const cases = [
@@ -80,14 +80,14 @@ const cases = [
     // A port that accepts the connection and then says nothing would leave the request
     // waiting there, so the handshake has a deadline of its own. It is `handshakeTimeout`
     // rather than `timeout`, which bare-http1 has already taken for the socket's idle
-    // timeout — the one option in these packages with no counterpart in Node's.
+    // timeout - the one option in these packages with no counterpart in Node's.
     agents(socksAgents(`socks5://127.0.0.1:${silent.port}`, { handshakeTimeout: 300 })).http
   ],
   [
     'the port speaks something else entirely',
     'http://origin.example/',
-    // A SOCKS5 client pointed at an http server. It answers — with `HTTP/1.1 400`, whose
-    // first byte is not 5 — so this is caught by the handshake rather than by a timeout.
+    // A SOCKS5 client pointed at an http server. It answers - with `HTTP/1.1 400`, whose
+    // first byte is not 5 - so this is caught by the handshake rather than by a timeout.
     agents(socksAgents(`socks5://127.0.0.1:${target.port}`)).http
   ],
   [
@@ -112,22 +112,22 @@ for (const [what, url, agent] of cases) {
     () => null,
     (err) => proxyErrorIn(err)
   )
-  console.log(`${what}\n  → ${err.message}\n`)
+  console.log(`${what}\n  -> ${err.message}\n`)
 }
 plaintext.destroy()
 
-// ── and a failure that is not the proxy's ────────────────────────────────────────────────
+// -- and a failure that is not the proxy's ------------------------------------------------
 
 // The proxy did its job: it reached the target, and the target answered 502. There is no
-// ProxyError here, and there should not be — the request succeeded as far as the proxy is
+// ProxyError here, and there should not be - the request succeeded as far as the proxy is
 // concerned, and a caller that treats every failure as a proxy problem would blame the
 // wrong hop.
 const working = agents(socksAgents(`socks5://127.0.0.1:${socks.port}`))
 const answered = await fetch('http://origin.example/broken', { agent: working.http })
 
 console.log("the target answered badly, and that is the target's business")
-console.log(`  → HTTP ${answered.status} ${await answered.text()}`)
-console.log('  → proxyErrorIn has nothing to say about it:', proxyErrorIn(null))
+console.log(`  -> HTTP ${answered.status} ${await answered.text()}`)
+console.log('  -> proxyErrorIn has nothing to say about it:', proxyErrorIn(null))
 
 for (const pair of open) {
   pair.http.destroy()

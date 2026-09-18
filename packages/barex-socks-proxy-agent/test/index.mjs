@@ -1,5 +1,5 @@
 // SOCKS5 spoken to a proxy of the test's own: greet, maybe authenticate, connect, pipe.
-// Nothing here reaches the network — the point is that a request made through these agents
+// Nothing here reaches the network - the point is that a request made through these agents
 // arrives as a request, and arrives from the proxy.
 import 'bare-fetch/global'
 import test from 'brittle'
@@ -26,7 +26,7 @@ test('the two socks schemes are the same proxy, spelled two ways', (t) => {
   t.exception.all(
     () => parse('socks5://127.0.0.1'),
     /names no port/,
-    'not read as 1080 — the port is written down, never guessed'
+    'not read as 1080 - the port is written down, never guessed'
   )
   t.exception.all(() => parse('http://127.0.0.1:3128'), /unsupported proxy scheme/)
 })
@@ -70,7 +70,7 @@ test('a hostname goes to the proxy unresolved, so no dns for it leaves here', as
   const proxy = await socks5(t)
 
   // `localhost` is a name, and the proxy reports back what it was handed rather than what
-  // it resolved — which is the whole point of leaving the lookup to the far end.
+  // it resolved - which is the whole point of leaving the lookup to the far end.
   const response = await fetch(`http://localhost:${origin.port}/hello`, {
     agent: agentsFor(t, proxy.port).http
   })
@@ -96,7 +96,7 @@ test('a proxy that wants credentials we do not have says which is missing', asyn
   const err = await failure(t, proxy.port)
   t.is(err.code, 'PROXY_ERROR')
   t.ok(
-    /wants authentication — put a username and password in the proxy url/.test(err.message),
+    /wants authentication - put a username and password in the proxy url/.test(err.message),
     err.message
   )
 })

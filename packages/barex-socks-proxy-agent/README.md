@@ -1,6 +1,6 @@
 # barex-socks-proxy-agent
 
-SOCKS5 proxy agents for [Bare](https://github.com/holepunchto/bare) — for `bare-fetch`,
+SOCKS5 proxy agents for [Bare](https://github.com/holepunchto/bare) - for `bare-fetch`,
 `bare-ws`, and anything else that takes a `bare-http1` agent.
 
 ```
@@ -27,7 +27,7 @@ createAgents('socks5://me:s3cret@127.0.0.1:1080')
 ### Names are resolved by the proxy
 
 The target hostname goes over the wire as written, so no DNS query for it leaves the
-machine — which is the point of a proxy for anyone who does not want their lookups
+machine - which is the point of a proxy for anyone who does not want their lookups
 observed. That is what `socks5h://` means elsewhere; here both schemes do it, and
 `socks5://` and `socks5h://` are the same proxy. The spelling is kept only so errors quote
 back what was configured.
@@ -43,18 +43,18 @@ checked against the host that was asked for and the proxy carries ciphertext it 
 
 #### `createAgents(proxy[, opts])`
 
-`{ http, https }` — an agent for `http:` targets and one for `https:` ones. `proxy` is a url
+`{ http, https }` - an agent for `http:` targets and one for `https:` ones. `proxy` is a url
 string or the result of `parse()`; `opts` goes to `bare-http1`'s `Agent`. Keep-alive is on by
 default.
 
-#### `new SocksProxyHTTPAgent(proxy[, opts])` · `new SocksProxyHTTPSAgent(proxy[, opts])`
+#### `new SocksProxyHTTPAgent(proxy[, opts])` / `new SocksProxyHTTPSAgent(proxy[, opts])`
 
 The two agents on their own, for when only one is wanted.
 
 #### `parse(url)`
 
 `{ protocol, host, port, username, password, secure }` for a `socks5://` or `socks5h://` url.
-Host and port only — a path or a query is refused rather than guessed at, and so is a
+Host and port only - a path or a query is refused rather than guessed at, and so is a
 missing port. `socks-proxy-agent` and curl both read a port-less proxy url as 1080, but
 plenty of SOCKS proxies listen somewhere else, and a guess that lands on the wrong service is
 handed the SOCKS5 handshake with the username and password in it before anything notices. The
@@ -64,10 +64,10 @@ port is one word that only the person configuring it knows.
 
 The SOCKS5 handshake itself, for use with `barex-proxy-agent` directly.
 
-#### `ProxyError` · `proxyErrorIn(err)`
+#### `ProxyError` / `proxyErrorIn(err)`
 
 Re-exported from [`barex-proxy-agent`](../barex-proxy-agent). `bare-fetch` reports every
-failure as `NETWORK_ERROR: Network error` and keeps the reason as its cause — `proxyErrorIn`
+failure as `NETWORK_ERROR: Network error` and keeps the reason as its cause - `proxyErrorIn`
 digs out the one that says the proxy is not running, or wants a password, or could not reach
 the host.
 
@@ -84,18 +84,18 @@ worth knowing before porting code across:
 | base class         | `agent-base`'s `Agent`, over `http.Agent`           | `bare-http1`'s `Agent`                                             |
 | hook               | `connect(req, opts)` returning a socket or an agent | `createConnection(opts)` returning a socket                        |
 | target protocol    | `opts.secureEndpoint`, added by `agent-base`        | `opts.protocol`                                                    |
-| one agent for both | yes — the class reads `secureEndpoint`              | a linked pair delegates by target protocol                         |
+| one agent for both | yes - the class reads `secureEndpoint`              | a linked pair delegates by target protocol                         |
 | handshake timeout  | `opts.timeout`                                      | `opts.handshakeTimeout` (`timeout` is bare-http1's socket timeout) |
 
 Nothing in the Node stack can be reused as it stands: Bare has no `net`, `tls` or `http`
 builtins, and `agent-base` is written against Node's `http.Agent` internals. The pair of
-agents is the one real ergonomic difference — bare-http1 hands an agent no way to tell an
+agents is the one real ergonomic difference - bare-http1 hands an agent no way to tell an
 `https:` target from an `http:` one, so which one a request needs is the caller's to pick.
 `createAgents()` returns both for exactly that reason.
 
 `socks-proxy-agent` also speaks SOCKS4 and SOCKS4a, and treats `socks5://` as _resolve the
 name here, ourselves_ and `socks5h://` as _let the proxy resolve it_. This package speaks
-SOCKS5 only, and resolves nothing under either scheme — see above. Code moved across gets
+SOCKS5 only, and resolves nothing under either scheme - see above. Code moved across gets
 more privacy than it asked for, never less, but a program relying on local resolution (a
 proxy that only accepts literal addresses, say) has to do that lookup itself.
 

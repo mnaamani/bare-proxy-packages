@@ -26,7 +26,7 @@ test('an http proxy url is read, and an https one says the first hop is TLS', (t
   t.exception.all(
     () => parse('http://proxy.example'),
     /names no port/,
-    'a port is written down, never guessed at — 80, 443, 1080 and 8080 all have a claim'
+    'a port is written down, never guessed at - 80, 443, 1080 and 8080 all have a claim'
   )
   t.exception.all(() => parse('socks5://127.0.0.1:1080'), /unsupported proxy scheme/)
 })

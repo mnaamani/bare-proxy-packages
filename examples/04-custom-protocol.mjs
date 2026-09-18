@@ -2,8 +2,8 @@
 //
 //   bare examples/04-custom-protocol.mjs
 //
-// SOCKS5 and `CONNECT` are two answers to one question — how do I ask this proxy to put me
-// through to somewhere else — and `barex-proxy-agent` is the part that does not depend on
+// SOCKS5 and `CONNECT` are two answers to one question - how do I ask this proxy to put me
+// through to somewhere else - and `barex-proxy-agent` is the part that does not depend on
 // the answer: a socket that is opened by handshake rather than by connecting, the agents
 // built on it, and the reading and error types a handshake is written against.
 //
@@ -23,12 +23,12 @@ import {
 } from 'barex-proxy-agent'
 import { hosts, origin } from './lib/toy-servers.mjs'
 
-// ── the protocol ─────────────────────────────────────────────────────────────────────────
+// -- the protocol -------------------------------------------------------------------------
 
 const SCHEMES = ['goto:']
 
 // Reading the url is `parseProxyUrl`'s job, and the scheme list is all it needs from you.
-// It refuses a url with no port, a url carrying a path, and a scheme it was not offered —
+// It refuses a url with no port, a url carrying a path, and a scheme it was not offered -
 // so a handshake never has to wonder what it was handed.
 function parse(url) {
   return parseProxyUrl(url, SCHEMES)
@@ -50,7 +50,7 @@ async function handshake({ socket, reader, proxy, target }) {
 
   // This line is built here rather than by an http client, so nothing upstream has checked
   // it for the characters that end one. A target carrying a newline would add a line to the
-  // conversation that the caller never wrote — a second GOTO, somewhere else, being the one
+  // conversation that the caller never wrote - a second GOTO, somewhere else, being the one
   // that matters.
   if (/[\r\n\0\s]/.test(to)) throw new ProxyError(`not a host and port to go to: ${to}`)
 
@@ -63,7 +63,7 @@ async function handshake({ socket, reader, proxy, target }) {
   const answer = (await reader.until('\n')).toString().trim()
 
   if (answer === 'DENIED') {
-    throw new ProxyError(`${name} wants credentials — put a username and password in the url`)
+    throw new ProxyError(`${name} wants credentials - put a username and password in the url`)
   }
   if (answer !== 'OPEN') {
     throw new ProxyError(`${name} would not put us through to ${to}: ${answer.toLowerCase()}`)
@@ -79,7 +79,7 @@ function agentsFor(proxy, opts) {
   return createAgents(tunnel(proxy), opts)
 }
 
-// ── a proxy that speaks it ───────────────────────────────────────────────────────────────
+// -- a proxy that speaks it ---------------------------------------------------------------
 
 const target = await origin()
 const echo = await echoServer()
@@ -87,7 +87,7 @@ const resolve = hosts({ 'origin.example': target.port, 'echo.example': echo.port
 
 const proxy = await gotoProxy({ resolve, password: 'hunter2' })
 
-// ── going through it ─────────────────────────────────────────────────────────────────────
+// -- going through it ---------------------------------------------------------------------
 
 const agents = agentsFor(`goto://alice:hunter2@127.0.0.1:${proxy.port}`, {
   handshakeTimeout: 5000
@@ -101,10 +101,10 @@ console.log('through the agent:', await response.text())
 console.log('the proxy was asked:', proxy.asked.join(' | '))
 console.log()
 
-// ── and through the socket, for something that is not http ───────────────────────────────
+// -- and through the socket, for something that is not http -------------------------------
 
 // `ProxySocket` is a `Duplex`, and an agent is only the thing that hands one to an http
-// client. Anything that speaks a stream can hold one directly — which is how you would
+// client. Anything that speaks a stream can hold one directly - which is how you would
 // route a protocol that is not http at all through the same proxy.
 const socket = new ProxySocket(tunnel(`goto://alice:hunter2@127.0.0.1:${proxy.port}`), {
   host: 'echo.example',
@@ -118,12 +118,12 @@ socket.write('anyone there?\n')
 
 const heard = await new Promise((resolve) => socket.once('data', resolve))
 console.log('through the socket:', heard.toString().trim())
-console.log('  the far end of it:', `${socket.remoteAddress}:${socket.remotePort}`, '— the proxy')
+console.log('  the far end of it:', `${socket.remoteAddress}:${socket.remotePort}`, '- the proxy')
 console.log('  where it is going:', `${socket.target.host}:${socket.target.port}`)
 socket.destroy()
 console.log()
 
-// ── failures ─────────────────────────────────────────────────────────────────────────────
+// -- failures -----------------------------------------------------------------------------
 
 // Each of these is a `ProxyError` thrown by the handshake above, found again with
 // `proxyErrorIn` after bare-fetch wrapped it in a `NETWORK_ERROR`.
@@ -159,7 +159,7 @@ for (const pair of open) {
 }
 for (const server of [target, echo, proxy]) await server.close()
 
-// ── the far ends, which are scaffolding rather than the point ────────────────────────────
+// -- the far ends, which are scaffolding rather than the point ----------------------------
 
 // A proxy that speaks the protocol above: `AUTH user pass`, then `GOTO host:port`, then it
 // puts the two sockets together.

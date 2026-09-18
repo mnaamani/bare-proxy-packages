@@ -1,7 +1,7 @@
 {
   "name": "barex-any-proxy-agent",
   "version": "0.1.0",
-  "description": "One entry point for every proxy scheme Bare speaks \u2014 socks5, socks5h, http, https \u2014 picking the agent a proxy url calls for",
+  "description": "One entry point for every proxy scheme Bare speaks - socks5, socks5h, http, https - picking the agent a proxy url calls for",
   "main": "index.mjs",
   "types": "./index.d.ts",
   "exports": {

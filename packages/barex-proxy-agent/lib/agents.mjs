@@ -5,7 +5,7 @@ import { ProxySocket } from './socket.mjs'
 import { proxyName } from './url.mjs'
 
 // An agent is where bare-http1 gets its connections, and bare-fetch and bare-ws both take
-// one — so a pair of these is the whole of routing a program's traffic through a proxy.
+// one - so a pair of these is the whole of routing a program's traffic through a proxy.
 //
 // Keep-alive is on for the same reason it is on bare's own agents, and matters more here: a
 // reused tunnel is a handshake, that is not built again.
@@ -15,7 +15,7 @@ export class ProxyHTTPAgent extends http.Agent {
   static protocols = []
 
   constructor(tunnel, opts = {}) {
-    // `handshakeTimeout` is ours and stops here — everything else is bare-http1's, and it
+    // `handshakeTimeout` is ours and stops here - everything else is bare-http1's, and it
     // copies its options onto every request's connection.
     //
     // `host`, `port` and `path` are dropped on the way, because that copy is a merge in
@@ -38,7 +38,7 @@ export class ProxyHTTPAgent extends http.Agent {
         queueMicrotask(() =>
           req.destroy(
             new ProxyError(
-              `${this.proxyUrl} was asked to carry an ${opts.protocol} target on port ${opts.port} — ` +
+              `${this.proxyUrl} was asked to carry an ${opts.protocol} target on port ${opts.port} - ` +
                 `use the ${secure ? 'https' : 'http'} agent for this request`
             )
           )
@@ -66,7 +66,7 @@ export class ProxyHTTPAgent extends http.Agent {
   _plaintext = true
 
   // What a connection is opened with. A getter so a subclass can fold in something that may
-  // change between requests — barex-https-proxy-agent's `proxyHeaders` is the case in point.
+  // change between requests - barex-https-proxy-agent's `proxyHeaders` is the case in point.
   // A subclass that overrides this must build on `super.tunnel` rather than on `_tunnel`, or
   // it drops the guard.
   get tunnel() {
@@ -96,7 +96,7 @@ function refuseSecretsInTheClear({ proxy, target }) {
   if (Number(target.port) !== 443) return
   throw new ProxyError(
     `${proxyName(proxy)} was asked to carry a plain http request to port 443 of ` +
-      `${target.host} — an https: target needs the https agent, which is the one that runs TLS`
+      `${target.host} - an https: target needs the https agent, which is the one that runs TLS`
   )
 }
 
@@ -172,7 +172,7 @@ class SecureProxySocket extends tls.Socket {
 }
 
 // The pair a caller usually wants: one agent for http urls, one for https, both tunnelling
-// through the same proxy. `tunnel` is `{ proxy, handshake }` — what ProxySocket takes.
+// through the same proxy. `tunnel` is `{ proxy, handshake }` - what ProxySocket takes.
 export function createAgents(tunnel, opts) {
   return pairAgents(new ProxyHTTPAgent(tunnel, opts), new ProxyHTTPSAgent(tunnel, opts))
 }

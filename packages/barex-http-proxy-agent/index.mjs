@@ -1,19 +1,19 @@
 // Forwarding through an http proxy for Bare, as an http agent bare-fetch and bare-ws can be
 // handed. Node's http-proxy-agent, and the same half of the job: the request goes to the
-// proxy with the whole url in the request line — `GET http://origin.example/v1/info HTTP/1.1`,
-// what RFC 9112 §3.2.2 calls absolute-form — and the proxy makes the request onwards.
+// proxy with the whole url in the request line - `GET http://origin.example/v1/info HTTP/1.1`,
+// what RFC 9112 section 3.2.2 calls absolute-form - and the proxy makes the request onwards.
 //
 // The other half is barex-https-proxy-agent, which asks the proxy for a tunnel with CONNECT
 // instead. The split is worth keeping for the same reason Node keeps it: forwarding is the
 // form every http proxy must accept, while a proxy configured to allow CONNECT to port 443
-// only — a common Squid default — will refuse a tunnel to port 80 and forward this happily.
+// only - a common Squid default - will refuse a tunnel to port 80 and forward this happily.
 //
 // http:// targets only, exactly as Node's http-proxy-agent. The proxy makes the request, so
 // there is no end-to-end connection for TLS to run over and nothing here for an https://
 // target to use; barex-https-proxy-agent's tunnel is what leaves TLS to the target intact.
 //
-// An `https://` proxy url means the first hop is itself TLS, so the request — and any
-// Proxy-Authorization on it — is encrypted to the proxy rather than sent in the clear. What
+// An `https://` proxy url means the first hop is itself TLS, so the request - and any
+// Proxy-Authorization on it - is encrypted to the proxy rather than sent in the clear. What
 // the proxy does onwards is unchanged, and it still reads the whole request.
 //
 // The socket, the agent base and the error type are barex-proxy-agent's.
@@ -28,7 +28,7 @@ import {
 // The schemes a proxy url may be written with. It is the proxy url being read here, not
 // the target's, so an https:// one is a proxy reached over TLS. No default port goes with
 // them: a port-less proxy url is refused rather than read as 80 or 443, which is what
-// http-proxy-agent reads it as — see parseProxyUrl.
+// http-proxy-agent reads it as - see parseProxyUrl.
 export const SCHEMES = ['http:', 'https:']
 
 export function parse(url) {
@@ -38,12 +38,12 @@ export function parse(url) {
   return proxy
 }
 
-// There is no handshake to speak here — the connection to the proxy is the connection, and
+// There is no handshake to speak here - the connection to the proxy is the connection, and
 // the request itself is what says where it is going. ProxySocket takes one anyway, and this
 // is it: what it buys is TLS to the proxy for an https:// proxy url, and the socket calls
 // bare-http1 makes on a connection that is still opening. ProxyHTTPAgent wraps it with the
-// one refusal every plaintext proxy agent shares — an https: target that reached the agent
-// built for http: — so there is nothing left for this one to do.
+// one refusal every plaintext proxy agent shares - an https: target that reached the agent
+// built for http: - so there is nothing left for this one to do.
 //
 // It also means the handshake timeout has nothing to time out. That is right rather than
 // missing: a forwarding proxy says nothing until it has answered the request, so a proxy
@@ -78,13 +78,13 @@ export class HttpProxyAgent extends ProxyHTTPAgent {
   // Where the request-line rewrite goes in, since it is the only place an agent is handed
   // the request at all. http-proxy-agent's rewrite, in http-proxy-agent's place: bare-http1
   // assigns `_path` and `_headers` before it calls this, so an edit made here is the one
-  // that goes out. That ordering is what the `^4.6.0` dependency is for — addRequest was
+  // that goes out. That ordering is what the `^4.6.0` dependency is for - addRequest was
   // called ahead of those assignments until then, and the edit would have been overwritten
   // a line later.
   //
   // Unconditional, where http-proxy-agent tests the path for `://` first to see whether it
-  // is already absolute. That test answers yes for any path that merely contains a url —
-  // `/callback?to=https://example.com`, which is what half of lnurl looks like — and the
+  // is already absolute. That test answers yes for any path that merely contains a url -
+  // `/callback?to=https://example.com`, which is what half of lnurl looks like - and the
   // request then goes to the proxy in origin-form with no Proxy-Authorization on it, for
   // the proxy to read as a request for itself. There is nothing here to test for: this
   // runs once per request, on a request that has not been written to yet.
@@ -99,7 +99,7 @@ export class HttpProxyAgent extends ProxyHTTPAgent {
     }
   }
 
-  // Everything the proxy — rather than the target — is being told, which for a forwarded
+  // Everything the proxy - rather than the target - is being told, which for a forwarded
   // request travels in the request's own headers. http-proxy-agent's set, and its order:
   // the caller's headers first, then credentials, then Proxy-Connection if nothing above
   // has already said one.
@@ -137,7 +137,7 @@ function absolute(req, opts) {
   return `http://${authority.host}${path}`
 }
 
-// Set a header without leaving a differently-cased one beside it — `_header()` lowercases
+// Set a header without leaving a differently-cased one beside it - `_header()` lowercases
 // every name on the way out, so two spellings of one name would go out as two headers.
 function set(req, name, value) {
   const lower = name.toLowerCase()

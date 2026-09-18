@@ -16,15 +16,15 @@ export interface Proxy {
   protocol: string
   /** The host, with an IPv6 address stripped of the brackets a url writes it in. */
   host: string
-  /** The port, which a proxy url must name — none is guessed. */
+  /** The port, which a proxy url must name - none is guessed. */
   port: number
   /** The username, percent-decoded, or `''` when the url carries none. */
   username: string
   /** The password, percent-decoded, or `''` when the url carries none. */
   password: string
   /**
-   * Whether the first hop is itself TLS, so that the handshake — and any credentials in it
-   * — is encrypted to the proxy rather than sent in the clear. Set by whoever parsed the
+   * Whether the first hop is itself TLS, so that the handshake - and any credentials in it
+   * - is encrypted to the proxy rather than sent in the clear. Set by whoever parsed the
    * url; an `https://` proxy is one.
    */
   secure: boolean
@@ -49,7 +49,7 @@ export interface ProxyTarget {
  * A host and a port, both written down, and nothing else: a path, a query or a fragment
  * means whoever configured this pasted something that is not a proxy address. A missing
  * port is refused rather than defaulted, which is the one place this departs from every
- * proxy agent in the Node ecosystem — `http-proxy-agent` reads a port-less url as 80, curl
+ * proxy agent in the Node ecosystem - `http-proxy-agent` reads a port-less url as 80, curl
  * as 1080, and proxies tend to listen on 8080, so any default is a guess, and a guess that
  * lands on the wrong service is handed the credentials before anything notices.
  *
@@ -89,9 +89,9 @@ export function hasCredentials(proxy: Pick<Proxy, 'username' | 'password'>): boo
 /**
  * Something went wrong on the way through a proxy.
  *
- * A proxy failure reaches the caller through whatever made the request — `bare-fetch`
+ * A proxy failure reaches the caller through whatever made the request - `bare-fetch`
  * answers one with `NETWORK_ERROR` and keeps the reason as its `cause`, and a library above
- * that may wrap it again — so {@link proxyErrorIn} is usually how it is found rather than
+ * that may wrap it again - so {@link proxyErrorIn} is usually how it is found rather than
  * `instanceof`.
  */
 export class ProxyError extends Error {
@@ -118,7 +118,7 @@ export function proxyErrorIn(err: unknown): ProxyError | null
 /**
  * Reads exact counts out of a socket while a handshake is being spoken.
  *
- * Only one read is outstanding at a time — a handshake is a conversation — and whatever was
+ * Only one read is outstanding at a time - a handshake is a conversation - and whatever was
  * read past the end of it is handed back by {@link Reader.release}, since it belongs to the
  * target. A {@link ProxySocket} makes one of these and passes it to the handshake; there is
  * rarely a reason to construct one yourself.
@@ -165,7 +165,7 @@ export class Reader {
 
 /** What a handshake is given: a socket to the proxy, a reader over it, and both ends. */
 export interface HandshakeContext {
-  /** The socket to the proxy — TLS to it already running when `proxy.secure`. */
+  /** The socket to the proxy - TLS to it already running when `proxy.secure`. */
   socket: Duplex
   /** A {@link Reader} over that socket, released for you once the handshake resolves. */
   reader: Reader
@@ -218,7 +218,7 @@ export interface ProxySocketOptions {
  *
  * A `Duplex` rather than a wrapper around a connected socket, because an http agent asks
  * for a connection and gets one back on the spot while a proxy handshake takes round trips.
- * Writes made before it finishes are held by the stream and go out after — which is what
+ * Writes made before it finishes are held by the stream and go out after - which is what
  * lets a TLS socket be layered straight on top of one of these, its `ClientHello` written
  * during construction and leaving once the tunnel is open.
  *
@@ -238,7 +238,7 @@ export class ProxySocket extends Duplex {
   get target(): ProxyTarget
 
   /**
-   * The far end of the underlying socket, which is the proxy — more honest than reporting a
+   * The far end of the underlying socket, which is the proxy - more honest than reporting a
    * target no socket was ever opened to. `undefined` until the connection is up.
    */
   get remoteAddress(): string | undefined
@@ -289,7 +289,7 @@ export interface ProxyAgentOptions
  *
  * Note that `createConnection()` returns a {@link ProxySocket}. It is left out of these
  * typings rather than narrowed, because `bare-http1` declares it as returning a `TCPSocket`
- * and a `ProxySocket` is not one — the only place these typings are looser than the code.
+ * and a `ProxySocket` is not one - the only place these typings are looser than the code.
  */
 export class ProxyHTTPAgent extends Agent {
   /**
@@ -315,7 +315,7 @@ export class ProxyHTTPAgent extends Agent {
   /**
    * What a connection is opened with.
    *
-   * A getter, so a subclass can fold in something that changes between requests — the
+   * A getter, so a subclass can fold in something that changes between requests - the
    * `proxyHeaders` of `barex-https-proxy-agent` is the case in point. A subclass that
    * overrides it must build on `super.tunnel` rather than on the underlying tunnel, or it
    * drops the refusal described below.
@@ -330,7 +330,7 @@ export class ProxyHTTPAgent extends Agent {
 /**
  * An http agent whose connections run through a proxy. For `https:` targets.
  *
- * The same tunnel as {@link ProxyHTTPAgent}, with TLS to the target negotiated inside it —
+ * The same tunnel as {@link ProxyHTTPAgent}, with TLS to the target negotiated inside it -
  * so the proxy carries ciphertext and never reads it. The certificate is checked against
  * the target, not against the proxy that carried the bytes.
  */

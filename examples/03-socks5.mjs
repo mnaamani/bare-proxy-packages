@@ -2,15 +2,15 @@
 //
 //   bare examples/03-socks5.mjs
 //
-// The interesting property of SOCKS5 is not that it carries traffic — every proxy does
-// that — but that it can be handed a *name*. The client writes the hostname into the
+// The interesting property of SOCKS5 is not that it carries traffic - every proxy does
+// that - but that it can be handed a *name*. The client writes the hostname into the
 // connect request and the proxy resolves it, so nothing on this machine ever looks it up.
 //
 // Elsewhere that is the difference between `socks5://` and `socks5h://`, and it is a
 // difference you have to remember to ask for. Here both schemes do it, and nothing is
 // resolved locally under either: code moved across from `socks-proxy-agent` gets more
-// privacy than it asked for, never less. A program that needs a local lookup — a proxy
-// that only accepts literal addresses, say — has to do it itself.
+// privacy than it asked for, never less. A program that needs a local lookup - a proxy
+// that only accepts literal addresses, say - has to do it itself.
 import 'bare-fetch/global'
 import { SocksProxyHTTPAgent, createAgents, parse, proxyErrorIn } from 'barex-socks-proxy-agent'
 import { hosts, origin, socks5Proxy } from './lib/toy-servers.mjs'
@@ -23,18 +23,18 @@ const proxy = await socks5Proxy({
   requireCredentials: true
 })
 
-// ── reading the url ──────────────────────────────────────────────────────────────────────
+// -- reading the url ----------------------------------------------------------------------
 
-// Both spellings parse, and the one that was written is kept — only so that an error can
+// Both spellings parse, and the one that was written is kept - only so that an error can
 // quote back what was configured, since they behave identically.
 for (const url of ['socks5://127.0.0.1:1080', 'socks5h://me:s3cret@127.0.0.1:1080']) {
   const { protocol, host, port, username } = parse(url)
-  console.log(`${url}  →  ${protocol} ${host}:${port}${username ? ` as ${username}` : ''}`)
+  console.log(`${url}  ->  ${protocol} ${host}:${port}${username ? ` as ${username}` : ''}`)
 }
 
 // A proxy url with no port is refused rather than defaulted. `socks-proxy-agent` and curl
 // both read a port-less url as 1080, http-proxy-agent reads one as 80, and proxies tend to
-// listen on 8080 — three answers, so any of them is a guess, and a guess that lands on the
+// listen on 8080 - three answers, so any of them is a guess, and a guess that lands on the
 // wrong service is handed the username and password before anything notices.
 try {
   parse('socks5://127.0.0.1')
@@ -43,7 +43,7 @@ try {
 }
 console.log()
 
-// ── going through it ─────────────────────────────────────────────────────────────────────
+// -- going through it ---------------------------------------------------------------------
 
 const agents = createAgents(`socks5://alice:hunter2@127.0.0.1:${proxy.port}`)
 
@@ -56,7 +56,7 @@ console.log('the proxy was asked to reach:', `${asked.host}:${asked.port}`)
 console.log('  which it was given as:     ', asked.type)
 console.log('  authenticating as:         ', asked.credentials.username)
 console.log()
-console.log('the origin was reached from:', target.seen[0].from, '— the proxy, not us')
+console.log('the origin was reached from:', target.seen[0].from, '- the proxy, not us')
 console.log()
 
 // An address is sent as an address, because there is nothing to resolve and the proxy
@@ -68,20 +68,20 @@ await fetch(`http://127.0.0.1:${target.port}/direct`, { agent: literal.http }).t
 console.log('asked for an address instead:', proxy.asked[1].type)
 console.log()
 
-// ── one agent at a time, when that is all you need ───────────────────────────────────────
+// -- one agent at a time, when that is all you need ---------------------------------------
 
 // `createAgents` is a convenience over the two classes. A program that only ever speaks to
-// `http:` targets can hold the one agent — there is no cost to the other, but there is no
+// `http:` targets can hold the one agent - there is no cost to the other, but there is no
 // reason for it either.
 const single = new SocksProxyHTTPAgent(`socks5://alice:hunter2@127.0.0.1:${proxy.port}`, {
   keepAlive: true,
   handshakeTimeout: 5000
 })
-console.log('one agent:', single.proxyUrl, '— speaking', SocksProxyHTTPAgent.protocols.join(', '))
+console.log('one agent:', single.proxyUrl, '- speaking', SocksProxyHTTPAgent.protocols.join(', '))
 console.log('note the password is not in that string, and never is')
 console.log()
 
-// ── what a refusal looks like ────────────────────────────────────────────────────────────
+// -- what a refusal looks like ------------------------------------------------------------
 
 // The proxy answers RFC 1928 reply code 5 for a host it cannot reach, and the agent says so
 // in those words rather than in a number.

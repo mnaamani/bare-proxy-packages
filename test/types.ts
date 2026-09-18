@@ -1,6 +1,6 @@
 // Exercises every export of every package, so that the typings are checked in use rather
 // than only parsed. `tsc --noEmit` runs with `skipLibCheck`, which means a declaration file
-// is not checked on its own — this is what checks them.
+// is not checked on its own - this is what checks them.
 //
 // Nothing here runs. It is compiled, never executed, which is why a socket may be a cast
 // and a proxy url need not be listening.
@@ -40,7 +40,7 @@ function expect<T>(value: T): void {
   void value
 }
 
-// barex-proxy-agent ───────────────────────────────────────────────────────────────────────
+// barex-proxy-agent -----------------------------------------------------------------------
 
 const proxy: Proxy = parseProxyUrl('demo://127.0.0.1:1080', ['demo:'])
 expect<string>(proxy.protocol)
@@ -126,7 +126,7 @@ class DemoAgent extends ProxyHTTPAgent {
 }
 expect<string>(new DemoAgent('demo://127.0.0.1:1080').proxyUrl)
 
-// barex-socks-proxy-agent ─────────────────────────────────────────────────────────────────
+// barex-socks-proxy-agent -----------------------------------------------------------------
 
 expect<string[]>(socks.SCHEMES)
 expect<Proxy>(socks.parse('socks5://127.0.0.1:1080'))
@@ -144,7 +144,7 @@ new socks.SocksProxyHTTPSAgent(new URL('socks5://127.0.0.1:1080'), { keepAlive: 
 expect<ProxyError | null>(socks.proxyErrorIn(err))
 expect<socks.ProxyLike>('socks5://127.0.0.1:1080')
 
-// barex-https-proxy-agent ─────────────────────────────────────────────────────────────────
+// barex-https-proxy-agent -----------------------------------------------------------------
 
 expect<string[]>(connect.SCHEMES)
 expect<Proxy>(connect.parse('http://127.0.0.1:3128'))
@@ -165,7 +165,7 @@ const rotating: connect.HttpsProxyAgentOptions = {
 }
 new connect.HttpsProxyHTTPSAgent('https://proxy.lan:443', rotating)
 
-// barex-http-proxy-agent ──────────────────────────────────────────────────────────────────
+// barex-http-proxy-agent ------------------------------------------------------------------
 
 expect<string[]>(forward.SCHEMES)
 expect<Proxy>(forward.parse('http://127.0.0.1:3128'))
@@ -179,7 +179,7 @@ expect<forward.ProxyHeaders>(forwarding.proxyHeaders)
 forwarding.proxyHeaders = () => ({ 'Proxy-Probe': 'again' })
 new forward.HttpProxyAgent(forward.parse('https://proxy.lan:443'))
 
-// barex-any-proxy-agent ───────────────────────────────────────────────────────────────────
+// barex-any-proxy-agent -------------------------------------------------------------------
 
 expect<string[]>(any.protocols)
 expect<Proxy>(any.parse('socks5://127.0.0.1:1080'))
@@ -191,7 +191,7 @@ expect<ProxyHTTPAgent>(anyAgents.http)
 expect<ProxyHTTPSAgent>(anyAgents.https)
 any.createAgents(any.parse('http://127.0.0.1:3128'), { headers: () => ({ A: 1 }) })
 
-// barex-proxy-from-env ────────────────────────────────────────────────────────────────────
+// barex-proxy-from-env --------------------------------------------------------------------
 
 expect<env.ProxySetting | null>(env.fromEnv('https_proxy', 'HTTPS_PROXY'))
 expect<env.ProxySetting | null>(env.proxyForProtocol('https:'))

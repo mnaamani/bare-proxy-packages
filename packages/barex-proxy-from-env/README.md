@@ -1,7 +1,7 @@
 # barex-proxy-from-env
 
-Which proxy the environment is asking for, under [Bare](https://github.com/holepunchto/bare)
-— `http_proxy`, `https_proxy`, `ALL_PROXY`, `no_proxy`. Node's
+Which proxy the environment is asking for, under [Bare](https://github.com/holepunchto/bare) -
+`http_proxy`, `https_proxy`, `ALL_PROXY`, `no_proxy`. Node's
 [`proxy-from-env`](https://www.npmjs.com/package/proxy-from-env).
 
 No sockets and no agents: this is the string half of using a proxy. What to do with the url
@@ -19,13 +19,13 @@ import { getProxyForUrl } from 'barex-proxy-from-env'
 getProxyForUrl('https://example.com') // 'http://proxy.lan:3128', or '' to go direct
 ```
 
-Where a program wants to say what it did and why — which is most of them, since a proxy that
-was picked up rather than asked for is worth mentioning — read it a piece at a time:
+Where a program wants to say what it did and why - which is most of them, since a proxy that
+was picked up rather than asked for is worth mentioning - read it a piece at a time:
 
 ```js
 import { proxyForProtocol, noProxy, bypassed } from 'barex-proxy-from-env'
 
-const found = proxyForProtocol('https:') // { url, source } — `source` is the variable that won
+const found = proxyForProtocol('https:') // { url, source } - `source` is the variable that won
 const bypass = noProxy()
 
 if (found && !bypassed(bypass, 'example.com'))
@@ -36,7 +36,7 @@ if (found && !bypassed(bypass, 'example.com'))
 
 As curl documents it: `http_proxy`, `https_proxy` and `ALL_PROXY` as the fallback for a
 scheme with none of its own, in either case, with the lower case spelling winning where both
-are set — **except `http_proxy`, which is read in lower case only**. Under CGI a request
+are set - **except `http_proxy`, which is read in lower case only**. Under CGI a request
 header `Proxy: ...` arrives in the environment as `HTTP_PROXY`, so honouring the upper case
 spelling would let whoever sent the request choose the proxy (CVE-2016-5385 and friends).
 The other variables have no such collision.
@@ -52,11 +52,11 @@ convention says "no proxy here", usually to undo one the login shell exported.
 #### `getProxyForUrl(url)`
 
 The proxy url for a target url, or `''` to go direct. `url` is a string or anything with
-`protocol` and `hostname` — a `URL` will do. Consults `no_proxy`.
+`protocol` and `hostname` - a `URL` will do. Consults `no_proxy`.
 
 #### `proxyForProtocol(protocol)`
 
-`{ url, source }` for a target scheme — `'https'`, `'https:'` or a `URL`'s `protocol` —
+`{ url, source }` for a target scheme - `'https'`, `'https:'` or a `URL`'s `protocol` -
 falling back to `ALL_PROXY`, or `null`. `source` is the spelling that actually won, so a
 value that turns out to be unusable can say which variable to go and fix. Does not consult
 `no_proxy`: that is a question about a host, and this is only about a scheme.
@@ -67,7 +67,7 @@ value that turns out to be unusable can say which variable to go and fix. Does n
 block the rest of this is made of, for a program with variables of its own to read on the
 same terms.
 
-#### `noProxy()` · `parseNoProxy(value)` · `bypassed(bypass, hostname)`
+#### `noProxy()` / `parseNoProxy(value)` / `bypassed(bypass, hostname)`
 
 Malformed CIDR entries are ignored. Prefixes must be decimal digits from `0` to `32`;
 an omitted prefix never means `/0`.
@@ -91,10 +91,10 @@ deliberate differences:
 
 |                         | Node                                   | here                                                                                                             |
 | ----------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `HTTP_PROXY`            | read, upper case as well as lower      | lower case only — see above                                                                                      |
+| `HTTP_PROXY`            | read, upper case as well as lower      | lower case only - see above                                                                                      |
 | `npm_config_*_proxy`    | read, and outranks the plain variables | not read: npm's own config, injected by `npm run`, and a program's traffic should not turn on how it was started |
 | scheme-less proxy value | given the **target's** scheme          | given `http://`, as curl does                                                                                    |
-| a port in `no_proxy`    | matched against the target's port      | ignored — it is the host being exempted, which is curl's reading                                                 |
+| a port in `no_proxy`    | matched against the target's port      | ignored - it is the host being exempted, which is curl's reading                                                 |
 | CIDR in `no_proxy`      | not supported                          | supported, as curl has since 7.86                                                                                |
 
 The pieces below `getProxyForUrl` are ours: Node's package exports that one function, and a

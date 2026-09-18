@@ -18,7 +18,7 @@ jobs:
         run: npm install
 
       # `npm run lint` ends in the type checks, and one of those asks Bare what each
-      # package exports — so this job needs a runtime as much as the test jobs do.
+      # package exports - so this job needs a runtime as much as the test jobs do.
       - name: Install Bare
         run: npm i -g bare-runtime
 

@@ -9,7 +9,7 @@
 //
 // The target here is a plain http origin, so that everything is visible in the transcript.
 // A real `https:` target works the same way, with `agents.https` negotiating TLS inside the
-// tunnel the proxy opened — at which point the proxy is carrying ciphertext.
+// tunnel the proxy opened - at which point the proxy is carrying ciphertext.
 import 'bare-fetch/global'
 import { createAgents, HttpsProxyHTTPAgent, proxyErrorIn } from 'barex-https-proxy-agent'
 import { connectProxy, hosts, origin } from './lib/toy-servers.mjs'
@@ -20,14 +20,14 @@ const proxy = await connectProxy({
   requireCredentials: true
 })
 
-// ── credentials, and headers that are the proxy's rather than the target's ───────────────
+// -- credentials, and headers that are the proxy's rather than the target's ---------------
 
 // Credentials go in the proxy url, as every proxy agent takes them, and leave as
-// `Proxy-Authorization` on the CONNECT — never on the request inside the tunnel, which the
+// `Proxy-Authorization` on the CONNECT - never on the request inside the tunnel, which the
 // proxy is not reading.
 //
 // `headers` is the rest of what the proxy is told. Given as a function it is called once
-// per tunnel, so a value that changes — a rotating token, a request id — is read when the
+// per tunnel, so a value that changes - a rotating token, a request id - is read when the
 // tunnel is opened rather than when the agent was made.
 let opened = 0
 const agents = createAgents(`http://alice:hunter2@127.0.0.1:${proxy.port}`, {
@@ -37,7 +37,7 @@ const agents = createAgents(`http://alice:hunter2@127.0.0.1:${proxy.port}`, {
 
 // `agents.http` for an `http:` target, `agents.https` for an `https:` one. The pair exists
 // because `bare-http1` tells an agent nothing about where a request is going, so the scheme
-// *is* the agent — see NODE-COMPATIBILITY.md.
+// *is* the agent - see NODE-COMPATIBILITY.md.
 const first = await fetch('http://origin.example/one', { agent: agents.http })
 console.log('response:', await first.text())
 
@@ -52,7 +52,7 @@ console.log(`tunnels opened:  ${proxy.asked.length}`)
 console.log(`requests made:   ${target.seen.length}`)
 console.log()
 
-// ── what each hop saw ────────────────────────────────────────────────────────────────────
+// -- what each hop saw --------------------------------------------------------------------
 
 const [asked] = proxy.asked
 console.log('the proxy was asked for:', asked.line)
@@ -70,7 +70,7 @@ console.log('  proxy-authorization:  ', target.seen[0].headers['proxy-authorizat
 console.log('  proxy-trace:          ', target.seen[0].headers['proxy-trace'] ?? '(none)')
 console.log()
 
-// ── the failures worth recognising ───────────────────────────────────────────────────────
+// -- the failures worth recognising -------------------------------------------------------
 
 // A proxy failure reaches the caller through whatever made the request: `bare-fetch`
 // answers every failure with `NETWORK_ERROR` and keeps the reason as its cause, so

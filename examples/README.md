@@ -25,41 +25,41 @@ They are meant to be read in order, but each stands alone.
 
 ## What each one is actually about
 
-**01 — from the environment.** The pairing most programs want, and the whole of it: read
+**01 - from the environment.** The pairing most programs want, and the whole of it: read
 `http_proxy` and friends, and turn whatever was found into agents. Shows which variable won
 and why that is worth reporting, how `no_proxy` carves holes in it (including CIDR), why
 websockets follow `http_proxy` rather than a `ws_proxy` that does not exist, and how to
-cache a pair of agents per proxy url — which is what Node's `ProxyAgent` cache amounts to.
+cache a pair of agents per proxy url - which is what Node's `ProxyAgent` cache amounts to.
 
-**02 — the tunnel.** What `CONNECT` is for, what the proxy is told versus what the target
+**02 - the tunnel.** What `CONNECT` is for, what the proxy is told versus what the target
 is told, and why `proxyHeaders` may be a function. Ends on the two refusals worth knowing:
 a proxy that wants a password, and the guard that stops an `https:` url being carried in
 the clear by the agent built for `http:`.
 
-**03 — SOCKS5.** The interesting property is not that it carries traffic but that it can be
-handed a _name_, which the proxy resolves — so no DNS query for the target leaves the
+**03 - SOCKS5.** The interesting property is not that it carries traffic but that it can be
+handed a _name_, which the proxy resolves - so no DNS query for the target leaves the
 machine. Shows that both `socks5:` and `socks5h:` do this here, that an address is still
 sent as an address, and why a port-less proxy url is refused rather than defaulted.
 
-**04 — a protocol of your own.** `barex-proxy-agent` is the half that does not depend on
+**04 - a protocol of your own.** `barex-proxy-agent` is the half that does not depend on
 which proxy protocol you speak, so a new one is a function: write, read a line, resolve or
 throw. Implements a made-up protocol end to end, points `fetch` at it, and then uses a
 `ProxySocket` directly to carry something that is not http at all.
 
-**05 — websockets.** An agent is what `bare-ws` takes too. The only thing to get right is
+**05 - websockets.** An agent is what `bare-ws` takes too. The only thing to get right is
 which of the pair, and it is the target's scheme that decides: `ws:` takes `agents.http`,
 `wss:` takes `agents.https`.
 
-**06 — failures.** A proxy failure reaches you wrapped in whatever noticed it, so
+**06 - failures.** A proxy failure reaches you wrapped in whatever noticed it, so
 `instanceof ProxyError` is false and the message says `NETWORK_ERROR`. `proxyErrorIn` walks
 the `cause` chain to the real reason. Runs through the six failures worth telling apart,
-and one that is the target's fault rather than the proxy's — which is the distinction the
+and one that is the target's fault rather than the proxy's - which is the distinction the
 function exists for.
 
 ## `lib/toy-servers.mjs`
 
 Scaffolding: the smallest thing that speaks each protocol correctly enough to be worth
-pointing a client at — a forwarding proxy, a `CONNECT` proxy, a SOCKS5 proxy, an origin,
+pointing a client at - a forwarding proxy, a `CONNECT` proxy, a SOCKS5 proxy, an origin,
 and a port that accepts connections and then says nothing. Each keeps a log of what it was
 asked for, which is how the examples show what went over the wire rather than asserting it.
 

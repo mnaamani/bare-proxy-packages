@@ -3,7 +3,7 @@
 // Every example in this folder runs on its own, with nothing installed and nothing
 // listening: the proxies they go through are these, started on a loopback port and shut
 // down at the end. They are the smallest thing that speaks each protocol correctly enough
-// to be worth pointing a client at, and each one keeps a log of what it was asked for —
+// to be worth pointing a client at, and each one keeps a log of what it was asked for -
 // which is how the examples show what actually went over the wire rather than asserting it.
 //
 // None of this is how you would write a proxy. Read the examples themselves for the parts
@@ -12,7 +12,7 @@ import tcp from 'bare-tcp'
 import http from 'bare-http1'
 
 // The names the proxies below know how to reach. The examples ask for hosts that resolve
-// nowhere — the whole point being that the client never looks them up — so the proxy is
+// nowhere - the whole point being that the client never looks them up - so the proxy is
 // the one that has to know where they are.
 //
 // An address is passed through as written, since there is nothing to resolve; a name that
@@ -294,7 +294,7 @@ function listening(server) {
 // that either closing takes the other down.
 //
 // Only the one direction: each proxy above is already forwarding client-to-upstream from
-// its own `data` handler, which is where it has to be — that handler is what decides when
+// its own `data` handler, which is where it has to be - that handler is what decides when
 // the handshake has ended and the bytes stop being the proxy's business. Adding the other
 // half here as well would write every chunk twice.
 function join(client, upstream) {

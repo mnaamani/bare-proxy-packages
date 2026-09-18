@@ -3,7 +3,7 @@
 // A proxy failure reaches the caller through whatever made the request: bare-fetch answers
 // one with `NETWORK_ERROR: Network error` and keeps the reason as its cause, and a library
 // above that may wrap it again. The code is what lets the reason be found again and shown
-// to whoever has to act on it — usually the person whose proxy is not running.
+// to whoever has to act on it - usually the person whose proxy is not running.
 export class ProxyError extends Error {
   constructor(message) {
     super(message)

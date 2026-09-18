@@ -12,14 +12,14 @@ import {
 } from 'barex-proxy-agent'
 
 /**
- * A proxy this package will take: a url, or one already read by {@link parse} — or by any
+ * A proxy this package will take: a url, or one already read by {@link parse} - or by any
  * other `parseProxyUrl`, so a url need only be read once.
  */
 export type ProxyLike = string | URL | Proxy
 
 /**
  * Headers for the proxy to read, as `https-proxy-agent` takes them: an object, or a
- * function called once per tunnel so that a value which changes — a rotating credential —
+ * function called once per tunnel so that a value which changes - a rotating credential -
  * is read when the tunnel is opened rather than when the agent was made.
  *
  * A `undefined` or `null` value is left out. The proxy is the one hop that reads these
@@ -39,7 +39,7 @@ export interface HttpsProxyAgentOptions extends ProxyAgentOptions {
  * The schemes a proxy url may be written with.
  *
  * It is the proxy url being read, not the target's, so an `https://` one is a proxy reached
- * over TLS — the `CONNECT` and any `Proxy-Authorization` on it are then encrypted to the
+ * over TLS - the `CONNECT` and any `Proxy-Authorization` on it are then encrypted to the
  * proxy rather than sent in the clear.
  *
  * No default port goes with them: a port-less proxy url is refused rather than read as 80
@@ -64,10 +64,10 @@ export interface ConnectHandshakeContext extends HandshakeContext {
 }
 
 /**
- * The HTTP `CONNECT` handshake (RFC 9110 §9.3.6): ask the proxy for a tunnel, and
+ * The HTTP `CONNECT` handshake (RFC 9110 section 9.3.6): ask the proxy for a tunnel, and
  * everything after the blank line belongs to the target.
  *
- * Nothing is sent beyond what the method needs — no user agent, no cookies — since the
+ * Nothing is sent beyond what the method needs - no user agent, no cookies - since the
  * proxy is the one hop that sees these headers rather than the ciphertext inside them.
  *
  * Exported for anyone assembling a tunnel by hand; the agents below already use it.
@@ -84,11 +84,11 @@ export function handshake(context: ConnectHandshakeContext): Promise<void>
  *
  * Note that forwarding, not tunnelling, is what an `http:` target usually wants:
  * `barex-http-proxy-agent` is that half, and a proxy configured to allow `CONNECT` to port
- * 443 only — a common Squid default — will refuse a tunnel to port 80 that a forwarded
+ * 443 only - a common Squid default - will refuse a tunnel to port 80 that a forwarded
  * request would have got through. Use this one when the tunnel is wanted specifically.
  */
 export class HttpsProxyHTTPAgent extends ProxyHTTPAgent {
-  /** `['http', 'https']` — the proxy's schemes, as `https-proxy-agent` lists them. */
+  /** `['http', 'https']` - the proxy's schemes, as `https-proxy-agent` lists them. */
   static protocols: string[]
 
   /**
@@ -106,7 +106,7 @@ export class HttpsProxyHTTPAgent extends ProxyHTTPAgent {
  * it, so the proxy carries ciphertext and never reads it.
  */
 export class HttpsProxyHTTPSAgent extends ProxyHTTPSAgent {
-  /** `['http', 'https']` — the proxy's schemes, as `https-proxy-agent` lists them. */
+  /** `['http', 'https']` - the proxy's schemes, as `https-proxy-agent` lists them. */
   static protocols: string[]
 
   /**

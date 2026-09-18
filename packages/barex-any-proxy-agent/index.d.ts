@@ -40,7 +40,7 @@ export const protocols: string[]
  * @param url The proxy url.
  * @returns The url read into its parts, ready to hand to {@link createAgents}.
  * @throws `Error` naming the schemes on offer when it is one of the many no agent here
- *   speaks — a proxy url that cannot be honoured is better refused than quietly ignored,
+ *   speaks - a proxy url that cannot be honoured is better refused than quietly ignored,
  *   since going direct is exactly what whoever set it was trying to prevent. Also for a url
  *   with no port: every scheme here has a port some client treats as its default and no two
  *   agree, so none of them is guessed.

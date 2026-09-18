@@ -14,13 +14,13 @@ const HANDSHAKE_TIMEOUT = 30000
 //
 // Duplex rather than a wrapper around a connected socket, because an http agent asks for a
 // connection and gets one back on the spot, while a proxy handshake takes round trips.
-// Writes made before it finishes are held by the stream and go out after — which is what
+// Writes made before it finishes are held by the stream and go out after - which is what
 // lets a TLS socket be layered straight on top of one of these: its ClientHello is written
 // during construction and leaves once the tunnel is open.
 //
 // The handshake itself is not this class's business. `handshake` is called once, with the
-// socket to the proxy and a Reader over it, and either resolves — the tunnel is open, and
-// everything after belongs to the target — or throws a ProxyError saying why not.
+// socket to the proxy and a Reader over it, and either resolves - the tunnel is open, and
+// everything after belongs to the target - or throws a ProxyError saying why not.
 export class ProxySocket extends Duplex {
   constructor({ proxy, handshake, timeout = HANDSHAKE_TIMEOUT }, opts = {}) {
     super({ eagerOpen: true })
@@ -37,7 +37,7 @@ export class ProxySocket extends Duplex {
     // connection it is done with, both of which may happen mid-handshake.
     //
     // `timeout` is seeded from the options because bare-tcp's own Socket takes it that way,
-    // and an agent that sets it there — bare-http1's do, ours included — would otherwise
+    // and an agent that sets it there - bare-http1's do, ours included - would otherwise
     // find it quietly dropped, leaving a proxied connection with no idle timeout where a
     // direct one has one. It is refreshed by traffic, so it bounds idleness, not the request.
     this._keepAlive = null
@@ -78,7 +78,7 @@ export class ProxySocket extends Duplex {
       const seconds = this._handshakeTimeout / 1000
       done(
         new ProxyError(
-          `${proxyName(this._proxy)} did not answer within ${seconds}s — is it a proxy?`
+          `${proxyName(this._proxy)} did not answer within ${seconds}s - is it a proxy?`
         )
       )
       // cb(err) destroys the stream, and _destroy below brings the socket down with it.

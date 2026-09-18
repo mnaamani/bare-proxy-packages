@@ -8,7 +8,7 @@ import {
 } from 'barex-proxy-agent'
 
 /**
- * A proxy this package will take: a url, or one already read by {@link parse} — or by any
+ * A proxy this package will take: a url, or one already read by {@link parse} - or by any
  * other `parseProxyUrl`, so a url need only be read once.
  */
 export type ProxyLike = string | URL | Proxy
@@ -31,7 +31,7 @@ export interface HttpProxyAgentOptions extends ProxyAgentOptions {
  * The schemes a proxy url may be written with.
  *
  * It is the proxy url being read, not the target's, so an `https://` one is a proxy reached
- * over TLS — the request, and any `Proxy-Authorization` on it, is then encrypted to the
+ * over TLS - the request, and any `Proxy-Authorization` on it, is then encrypted to the
  * proxy rather than sent in the clear. What the proxy does onwards is unchanged, and it
  * still reads the whole request.
  *
@@ -53,14 +53,14 @@ export function parse(url: string | URL): Proxy
 /**
  * An agent that asks an http proxy to forward, for `http:` targets.
  *
- * The request goes to the proxy with the whole url in the request line —
- * `GET http://origin.example/v1/info HTTP/1.1`, what RFC 9112 §3.2.2 calls absolute-form —
+ * The request goes to the proxy with the whole url in the request line -
+ * `GET http://origin.example/v1/info HTTP/1.1`, what RFC 9112 section 3.2.2 calls absolute-form -
  * and the proxy makes the request onwards. Node's `http-proxy-agent`, and the same half of
  * the job: `barex-https-proxy-agent` is the other, asking for a tunnel with `CONNECT`.
  *
  * The split is worth keeping for the reason Node keeps it. Forwarding is the form every
- * http proxy must accept, while a proxy configured to allow `CONNECT` to port 443 only — a
- * common Squid default — will refuse a tunnel to port 80 and forward this happily.
+ * http proxy must accept, while a proxy configured to allow `CONNECT` to port 443 only - a
+ * common Squid default - will refuse a tunnel to port 80 and forward this happily.
  *
  * `http:` targets only, exactly as `http-proxy-agent`. The proxy makes the request, so
  * there is no end-to-end connection for TLS to run over and nothing here for an `https:`
@@ -68,7 +68,7 @@ export function parse(url: string | URL): Proxy
  * intact. There is no agent pair here for the same reason.
  */
 export class HttpProxyAgent extends ProxyHTTPAgent {
-  /** `['http', 'https']` — the proxy's schemes, as `http-proxy-agent` lists them. */
+  /** `['http', 'https']` - the proxy's schemes, as `http-proxy-agent` lists them. */
   static protocols: string[]
 
   /**

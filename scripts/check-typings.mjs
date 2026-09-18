@@ -1,6 +1,6 @@
 // Every package ships a handwritten index.d.ts, and nothing about a declaration file makes
 // it agree with the code it describes: `tsc` reads the .d.ts and never opens the .mjs. This
-// is what holds the two together — the names each side exports, compared.
+// is what holds the two together - the names each side exports, compared.
 //
 // Run under Node, since the TypeScript compiler is a Node package; the runtime exports come
 // from Bare, since the packages import bare-tcp and friends and will not load anywhere else.
@@ -13,7 +13,7 @@ import ts from 'typescript'
 
 const PACKAGES = readdirSync('packages').sort()
 
-// The value exports a declaration file names — what `import { x }` can actually reach at
+// The value exports a declaration file names - what `import { x }` can actually reach at
 // runtime. Types are left out: they have no runtime counterpart to compare against.
 function declared(file) {
   const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest)
@@ -73,7 +73,7 @@ for (const name of PACKAGES) {
   const undeclared = [...values].filter((exported) => !types.has(exported)).sort()
 
   if (missing.length === 0 && undeclared.length === 0) {
-    console.log(`✓ ${name} — ${types.size} exports`)
+    console.log(`ok ${name} - ${types.size} exports`)
     continue
   }
 
@@ -82,10 +82,10 @@ for (const name of PACKAGES) {
   // something that is not there, which fails at run time for whoever believed it; the
   // second is a working export nobody can discover.
   for (const exported of missing) {
-    console.log(`✗ ${name} — declared but not exported: ${exported}`)
+    console.log(`FAIL ${name} - declared but not exported: ${exported}`)
   }
   for (const exported of undeclared) {
-    console.log(`✗ ${name} — exported but not declared: ${exported}`)
+    console.log(`FAIL ${name} - exported but not declared: ${exported}`)
   }
 }
 

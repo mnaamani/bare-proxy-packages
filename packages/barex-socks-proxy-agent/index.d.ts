@@ -12,7 +12,7 @@ import {
 } from 'barex-proxy-agent'
 
 /**
- * A proxy this package will take: a url, or one already read by {@link parse} — or by any
+ * A proxy this package will take: a url, or one already read by {@link parse} - or by any
  * other `parseProxyUrl`, so a url need only be read once.
  */
 export type ProxyLike = string | URL | Proxy
@@ -20,8 +20,8 @@ export type ProxyLike = string | URL | Proxy
 /**
  * The schemes a proxy url may be written with here.
  *
- * `socks5://` and `socks5h://` are the same proxy to this package — the target is never
- * resolved locally under either — and the spelling is kept only so that errors quote back
+ * `socks5://` and `socks5h://` are the same proxy to this package - the target is never
+ * resolved locally under either - and the spelling is kept only so that errors quote back
  * what was configured.
  *
  * No default port goes with them: a port-less proxy url is refused rather than read as

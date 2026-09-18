@@ -14,7 +14,7 @@ import {
 test('a scheme is read from its own variable, in either case', (t) => {
   t.teardown(withEnv({ https_proxy: 'http://secure.lan:3128' }))
   t.alike(proxyForProtocol('https:'), { url: 'http://secure.lan:3128', source: 'https_proxy' })
-  t.is(proxyForProtocol('http:'), null, 'and not from another scheme’s')
+  t.is(proxyForProtocol('http:'), null, "and not from another scheme's")
 })
 
 test('the lower case spelling wins where both are set', (t) => {
@@ -34,7 +34,7 @@ test('ALL_PROXY covers a scheme with no proxy of its own', (t) => {
   t.teardown(withEnv({ all_proxy: 'socks5://127.0.0.1:1080', https_proxy: 'http://secure.lan:1' }))
   t.is(proxyForProtocol('http:').url, 'socks5://127.0.0.1:1080')
   t.is(proxyForProtocol('http:').source, 'all_proxy')
-  t.is(proxyForProtocol('https:').url, 'http://secure.lan:1', 'a scheme’s own still wins')
+  t.is(proxyForProtocol('https:').url, 'http://secure.lan:1', "a scheme's own still wins")
 })
 
 test('a variable set to nothing is not set', (t) => {
@@ -114,7 +114,7 @@ test('no_proxy is read from the environment in either case', (t) => {
 //
 // Cleared to '' rather than deleted, which is what "not set" means to this package anyway:
 // Bare's process.env does not take a delete. Cleared first and set second, because on
-// Windows the environment is case-insensitive — `https_proxy` and `HTTPS_PROXY` are one
+// Windows the environment is case-insensitive - `https_proxy` and `HTTPS_PROXY` are one
 // variable there, and clearing after setting would wipe the value the test just asked for.
 const VARS = [
   'http_proxy',

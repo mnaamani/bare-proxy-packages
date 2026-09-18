@@ -3,13 +3,13 @@
 Proxy support for [Bare](https://github.com/holepunchto/bare): agents that `bare-fetch` and
 `bare-ws` take, so a program's http and websocket traffic goes through a proxy.
 
-An npm workspace — each directory under `packages/` is published on its own.
+An npm workspace - each directory under `packages/` is published on its own.
 
 | Package                                                       | What it does                                                                         | Node counterpart                                                       |
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
 | [`barex-any-proxy-agent`](packages/barex-any-proxy-agent)     | One entry point for every scheme below, picked from the proxy url                    | [`proxy-agent`](https://www.npmjs.com/package/proxy-agent)             |
 | [`barex-socks-proxy-agent`](packages/barex-socks-proxy-agent) | SOCKS5, and `socks5h` where the proxy resolves the target name                       | [`socks-proxy-agent`](https://www.npmjs.com/package/socks-proxy-agent) |
-| [`barex-http-proxy-agent`](packages/barex-http-proxy-agent)   | An http proxy asked to forward — the absolute-form half of Node's `http-proxy-agent` | [`http-proxy-agent`](https://www.npmjs.com/package/http-proxy-agent)   |
+| [`barex-http-proxy-agent`](packages/barex-http-proxy-agent)   | An http proxy asked to forward - the absolute-form half of Node's `http-proxy-agent` | [`http-proxy-agent`](https://www.npmjs.com/package/http-proxy-agent)   |
 | [`barex-https-proxy-agent`](packages/barex-https-proxy-agent) | HTTP `CONNECT` tunnels                                                               | [`https-proxy-agent`](https://www.npmjs.com/package/https-proxy-agent) |
 | [`barex-proxy-agent`](packages/barex-proxy-agent)             | The socket, agents and handshake plumbing the three above share                      | [`agent-base`](https://www.npmjs.com/package/agent-base)               |
 | [`barex-proxy-from-env`](packages/barex-proxy-from-env)       | Reads `http_proxy`, `https_proxy`, `ALL_PROXY` and `no_proxy`                        | [`proxy-from-env`](https://www.npmjs.com/package/proxy-from-env)       |
@@ -52,14 +52,14 @@ bare examples/01-from-env.mjs
 ## Types
 
 Every package ships a handwritten `index.d.ts`, documented with TSDoc, so an editor has
-both the signature and the reasoning at the call site. Nothing needs installing — the
+both the signature and the reasoning at the call site. Nothing needs installing - the
 declarations come with the package, under its `types` export condition.
 
 `bare-url` and `bare-buffer` are optional peer dependencies: a `URL` and a `Buffer` appear
 in the signatures, and a project that typechecks against Bare will have both, but neither
 is loaded at run time. This is how `bare-http1` declares the same pair.
 
-Declaration files are handwritten, so nothing makes them agree with the code on their own —
+Declaration files are handwritten, so nothing makes them agree with the code on their own -
 `npm run types` is what does, and it runs in CI:
 
 ```sh
